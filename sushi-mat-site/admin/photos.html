@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Фото меню — Суши Мать</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0A0A0D;color:#fff;padding:20px}
+  h1{color:#D4A853;margin-bottom:15px;font-size:24px}
+  .mode-bar{background:#121214;border:1px solid #333;border-radius:8px;padding:12px 16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+  .mode-bar.online{border-color:#2ecc40}
+  .mode-bar.offline{border-color:#e74c3c}
+  .mode-text{font-size:13px}
+  .mode-text .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+  .mode-online{color:#2ecc40}
+  .mode-offline{color:#e74c3c}
+
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:15px;margin-bottom:25px}
+  .stat-card{background:#121214;border:1px solid #D4A85333;border-radius:12px;padding:18px;text-align:center}
+  .stat-number{font-size:32px;font-weight:bold;color:#D4A853}
+  .stat-label{font-size:13px;color:#888;margin-top:5px}
+
+  .tabs{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+  .tab{padding:10px 20px;background:#121214;border:1px solid #333;border-radius:8px;cursor:pointer;color:#888;font-size:14px}
+  .tab.active{background:#D4A85322;border-color:#D4A853;color:#D4A853}
+
+  .search-box{width:100%;max-width:400px;padding:10px 15px;background:#121214;border:1px solid #333;border-radius:8px;color:#fff;font-size:14px;margin-bottom:20px}
+  .search-box:focus{outline:none;border-color:#D4A853}
+
+  .item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:15px}
+  .item-card{background:#121214;border:1px solid #333;border-radius:12px;overflow:hidden;transition:all .2s}
+  .item-card:hover{border-color:#D4A853}
+  .item-card.has-photo{border-color:#2ecc4055}
+  .item-photo{width:100%;height:170px;object-fit:cover;background:#1A1A1D;display:block}
+  .item-photo.placeholder{height:170px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px}
+
+  .item-body{padding:12px}
+  .item-name{font-size:15px;font-weight:600;margin-bottom:4px}
+  .item-meta{font-size:11px;color:#888;margin-bottom:8px}
+  .item-status{font-size:11px;padding:3px 10px;border-radius:20px;display:inline-block}
+  .status-ok{background:#2ecc4022;color:#2ecc40}
+  .status-missing{background:#e74c3c22;color:#e74c3c}
+
+  .upload-area{border:2px dashed #D4A85355;border-radius:8px;padding:12px;text-align:center;cursor:pointer;transition:all .2s;background:#D4A85308;margin-top:8px}
+  .upload-area:hover{border-color:#D4A853;background:#D4A85315}
+  .upload-area input{display:none}
+  .upload-preview{width:100%;height:80px;object-fit:cover;border-radius:6px;margin-top:8px;display:none}
+
+  .btn{width:100%;padding:8px;margin-top:8px;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px;transition:all .2s}
+  .btn-primary{background:#D4A853;color:#0A0A0D}
+  .btn-primary:hover{background:#E8C056}
+  .btn-primary:disabled{background:#555;cursor:not-allowed}
+  .btn-danger{background:#e74c3c;color:#fff}
+  .btn-danger:hover{background:#c0392b}
+
+  .progress-bar{width:100%;height:4px;background:#333;border-radius:2px;margin-top:8px;overflow:hidden;display:none}
+  .progress-bar.active{display:block}
+  .progress-fill{height:100%;background:#D4A853;width:0%;transition:width .3s}
+
+  .result-msg{font-size:12px;margin-top:8px;padding:8px;border-radius:6px;display:none;word-break:break-all}
+  .result-msg.show{display:block}
+  .result-success{background:#2ecc4022;color:#2ecc40}
+  .result-error{background:#e74c3c22;color:#e74c3c}
+  .result-info{background:#3498db22;color:#3498db}
+
+  .code-box{background:#0A0A0D;border:1px solid #555;border-radius:6px;padding:10px;font-size:11px;margin-top:8px;word-break:break-all;display:none}
+  .code-box.show{display:block}
+
+  .replace-section{margin-top:10px;padding-top:10px;border-top:1px solid #333}
+  .replace-toggle{background:none;border:none;color:#e67e22;cursor:pointer;font-size:12px;padding:0}
+  .replace-area{display:none;margin-top:8px}
+  .replace-area.active{display:block}
+
+  .empty-state{color:#888;text-align:center;padding:40px;grid-column:1/-1}
+  .hidden{display:none!important}
+  .section{margin-bottom:30px}
+
+  .toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:8px;font-size:14px;z-index:1000;animation:slideIn .3s ease}
+  .toast.success{background:#2ecc40;color:#fff}
+  .toast.error{background:#e74c3c;color:#fff}
+  .toast.info{background:#3498db;color:#fff}
+  @keyframes slideIn{from{transform:translateX(100px);opacity:0}to{transform:translateX(0);opacity:1}}
+</style>
+</head>
+<body>
+<div style="display:flex;gap:15px;margin-bottom:15px;flex-wrap:wrap;">
+  <div style="margin-bottom:15px">
+    <a href="./telegram.html" style="color:#888;text-decoration:none;font-size:14px;margin-right:15px">Telegram</a>
+    <a href="./max.html" style="color:#888;text-decoration:none;font-size:14px;margin-right:15px">MAX</a>
+  </div>
+</div>
+<h1>📸 Управление фото меню</h1>
+
+<div class="mode-bar" id="modeBar">
+  <span class="mode-text" id="modeText">Проверка API...</span>
+</div>
+
+<div class="stats">
+  <div class="stat-card"><div class="stat-number" id="st-total">-</div><div class="stat-label">Всего</div></div>
+  <div class="stat-card"><div class="stat-number" id="st-with">-</div><div class="stat-label">С фото</div></div>
+  <div class="stat-card"><div class="stat-number" id="st-without">-</div><div class="stat-label">Без фото</div></div>
+  <div class="stat-card"><div class="stat-number" id="st-pct">-%</div><div class="stat-label">Готово</div></div>
+</div>
+
+<input type="text" class="search-box" id="search" placeholder="🔍 Поиск по названию..." oninput="doSearch(this.value)">
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('missing',this)">Без фото (<span id="ct-missing">-</span>)</div>
+  <div class="tab" onclick="switchTab('with',this)">С фото (<span id="ct-with">-</span>)</div>
+  <div class="tab" onclick="switchTab('all',this)">Все (<span id="ct-all">-</span>)</div>
+</div>
+
+<div id="tab-missing" class="section"><div class="item-grid" id="grid-missing"><div class="empty-state">Загрузка...</div></div></div>
+<div id="tab-with" class="hidden"><div class="item-grid" id="grid-with"><div class="empty-state">Загрузка...</div></div></div>
+<div id="tab-all" class="hidden"><div class="item-grid" id="grid-all"><div class="empty-state">Загрузка...</div></div></div>
+
+<script>
+var items = [];
+var uploads = {};
+
+function setMode(){
+  var bar=document.getElementById('modeBar');
+  var txt=document.getElementById('modeText');
+  bar.className='mode-bar offline';
+  txt.innerHTML='<span class="mode-offline">● Режим: выберите фото → скачайте файл → отправьте мне код + фото</span>';
+}
+
+fetch('./menu-data.json').then(function(r){return r.json()}).then(function(data){
+  items=data;
+  setMode();
+  updateStats();
+  renderMissing();
+  renderWith();
+  renderAll();
+});
+
+function updateStats(){
+  var total=items.length;
+  var withPhoto=items.filter(function(i){return i.image}).length;
+  var without=total-withPhoto;
+  document.getElementById('st-total').textContent=total;
+  document.getElementById('st-with').textContent=withPhoto;
+  document.getElementById('st-without').textContent=without;
+  document.getElementById('st-pct').textContent=Math.round(withPhoto/total*100)+'%';
+  document.getElementById('ct-missing').textContent=without;
+  document.getElementById('ct-with').textContent=withPhoto;
+  document.getElementById('ct-all').textContent=total;
+}
+
+function switchTab(tab,el){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+  el.classList.add('active');
+  ['missing','with','all'].forEach(function(t){
+    document.getElementById('tab-'+t).classList.toggle('hidden',t!==tab);
+  });
+}
+
+function doSearch(q){
+  q=q.toLowerCase().trim();
+  if(!q){renderMissing();renderWith();renderAll();return}
+  var f=items.filter(function(i){return i.name.toLowerCase().includes(q)});
+  document.getElementById('grid-missing').innerHTML=f.filter(function(i){return!i.image}).map(function(i){return card(i,true)}).join('')||'<div class="empty-state">Ничего не найдено</div>';
+  document.getElementById('grid-with').innerHTML=f.filter(function(i){return i.image}).map(function(i){return card(i,false)}).join('')||'<div class="empty-state">Ничего не найдено</div>';
+  document.getElementById('grid-all').innerHTML=f.map(function(i){return card(i,!i.image)}).join('')||'<div class="empty-state">Ничего не найдено</div>';
+}
+
+function buildUploadHtml(id,isReplace){
+  var labelId=isReplace?'rup-':'up-';
+  var pvId=isReplace?'rpv-':'pv-';
+  var btnId=isReplace?'rbt-':'bt-';
+  var codeId=isReplace?'rcb-':'cb-';
+  var rsId=isReplace?'rrs-':'rs-';
+  var onCh=isReplace?'onReplace':'onSelect';
+  var btnLabel=isReplace?'📥 Скачать + код замены':'📥 Скачать фото + код';
+  var areaBorder=isReplace?'border-color:#e67e2255':'';
+  var labelColor=isReplace?'color:#e67e22':'';
+  var btnClass=isReplace?'btn btn-danger':'btn btn-primary';
+  return '<label class="upload-area" for="'+labelId+id+'" style="'+areaBorder+'">'+
+      '<input type="file" id="'+labelId+id+'" accept="image/*" onchange="'+onCh+'('+id+',this)">'+
+      '<div style="'+labelColor+'">📷 <strong>Выбрать фото</strong></div>'+
+      '<img class="upload-preview" id="'+pvId+id+'">'+
+    '</label>'+
+    '<button class="'+btnClass+'" id="'+btnId+id+'" onclick="'+(isReplace?'doReplace':'doSave')+'('+id+')" disabled>'+btnLabel+'</button>'+
+    '<div class="code-box" id="'+codeId+id+'"></div>'+
+    '<div class="result-msg" id="'+rsId+id+'"></div>';
+}
+
+function card(item,showUpload){
+  var has=!!item.image;
+  var photo=has
+    ?'<img class="item-photo" src="'+item.image+'" alt="'+item.name+'" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="item-photo placeholder" style="display:none">Ошибка загрузки</div>'
+    :'<div class="item-photo placeholder" id="ph-'+item.id+'">Нет фото</div>';
+  var cats=item.cats?item.cats.join(', '):'';
+
+  // Direct upload for items without photo (when showUpload=true)
+  var directUpload='';
+  if(showUpload && !has){
+    directUpload=buildUploadHtml(item.id,false);
+  }
+
+  // Replace section for items with photo (always available)
+  var replaceSection='';
+  if(has){
+    replaceSection=
+      '<div class="replace-section">'+
+        '<button class="replace-toggle" onclick="toggleRp('+item.id+')">🔄 Заменить фото</button>'+
+        '<div class="replace-area" id="rp-'+item.id+'">'+buildUploadHtml(item.id,true)+'</div>'+
+      '</div>';
+  }
+
+  return'<div class="item-card '+(has?'has-photo':'')+'">'+photo+
+    '<div class="item-body">'+
+      '<div class="item-name">'+item.name+'</div>'+
+      '<div class="item-meta">ID: '+item.id+' | '+item.price+'₽ | '+cats+'</div>'+
+      '<span class="item-status '+(has?'status-ok':'status-missing')+'">'+(has?'✓ С фото':'✗ Без фото')+'</span>'+
+      directUpload+replaceSection+
+    '</div></div>';
+}
+
+function renderMissing(){
+  var list=items.filter(function(i){return!i.image});
+  document.getElementById('grid-missing').innerHTML=list.length?list.map(function(i){return card(i,true)}).join(''):'<div class="empty-state" style="color:#2ecc40">Все блюда имеют фото!</div>';
+}
+function renderWith(){
+  document.getElementById('grid-with').innerHTML=items.filter(function(i){return i.image}).map(function(i){return card(i,false)}).join('');
+}
+function renderAll(){
+  document.getElementById('grid-all').innerHTML=items.map(function(i){return card(i,!i.image)}).join('');
+}
+
+function onSelect(id,input){
+  var file=input.files[0];
+  if(!file)return;
+  var item=items.find(function(i){return i.id===id});
+  uploads[id]={file:file,item:item};
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var pv=document.getElementById('pv-'+id);
+    pv.src=e.target.result;
+    pv.style.display='block';
+    var ph=document.getElementById('ph-'+id);
+    if(ph)ph.style.display='none';
+    document.getElementById('bt-'+id).disabled=false;
+    showCode(id);
+  };
+  reader.readAsDataURL(file);
+}
+
+function onReplace(id,input){
+  var file=input.files[0];
+  if(!file)return;
+  var item=items.find(function(i){return i.id===id});
+  uploads[id]={file:file,item:item,mode:'replace'};
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var pv=document.getElementById('rpv-'+id);
+    pv.src=e.target.result;
+    pv.style.display='block';
+    document.getElementById('rbt-'+id).disabled=false;
+    showReplaceCode(id);
+  };
+  reader.readAsDataURL(file);
+}
+
+function toggleRp(id){
+  document.getElementById('rp-'+id).classList.toggle('active');
+}
+
+function getSafeName(name){
+  return name.toLowerCase().replace(/[^a-zа-яё0-9\s]/g,'').replace(/\s+/g,'_').substring(0,30);
+}
+function getFilename(id,name,origName){
+  var ext=origName.split('.').pop().toLowerCase()||'jpg';
+  return getSafeName(name)+'_'+id+'.'+ext;
+}
+function getCode(id,filename){
+  return "image: '/catalog/"+filename+"',";
+}
+
+function showCode(id){
+  var up=uploads[id];
+  if(!up)return;
+  var fn=getFilename(id,up.item.name,up.file.name);
+  var code=getCode(id,fn);
+  var box=document.getElementById('cb-'+id);
+  box.textContent=code;
+  box.classList.add('show');
+  var rs=document.getElementById('rs-'+id);
+  rs.innerHTML='Нажмите кнопку выше, чтобы скачать фото и скопировать код';
+  rs.className='result-msg show result-info';
+}
+
+function showReplaceCode(id){
+  var up=uploads[id];
+  if(!up)return;
+  var fn=getFilename(id,up.item.name,up.file.name);
+  var code='// ЗАМЕНА: '+up.item.name+'\n// Старое: '+up.item.image+'\n// Новое:  /catalog/'+fn+'\n'+getCode(id,fn);
+  var box=document.getElementById('rcb-'+id);
+  box.textContent=code;
+  box.classList.add('show');
+  var rs=document.getElementById('rrs-'+id);
+  rs.innerHTML='Нажмите кнопку выше, чтобы скачать фото и скопировать код замены';
+  rs.className='result-msg show result-info';
+}
+
+function downloadFile(file,filename){
+  var url=URL.createObjectURL(file);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);a.remove()},1000);
+}
+
+function doSave(id){
+  var up=uploads[id];
+  if(!up||!up.file)return;
+  var fn=getFilename(id,up.item.name,up.file.name);
+  var code=getCode(id,fn);
+  downloadFile(up.file,fn);
+  navigator.clipboard.writeText(code).then(function(){
+    showToast('✓ Фото скачано, код скопирован! Отправь мне файл + код','success');
+  }).catch(function(){
+    prompt('Код скопируй:',code);
+  });
+}
+
+function doReplace(id){
+  var up=uploads[id];
+  if(!up||!up.file)return;
+  var fn=getFilename(id,up.item.name,up.file.name);
+  var code='// ЗАМЕНА: '+up.item.name+'\n// Старое: '+up.item.image+'\n// Новое:  /catalog/'+fn+'\n'+getCode(id,fn);
+  downloadFile(up.file,fn);
+  navigator.clipboard.writeText(code).then(function(){
+    showToast('✓ Фото скачано, код замены скопирован! Отправь мне файл + код','success');
+  }).catch(function(){
+    prompt('Код замены скопируй:',code);
+  });
+}
+
+function showToast(msg,type){
+  type=type||'success';
+  var ex=document.querySelector('.toast');
+  if(ex)ex.remove();
+  var t=document.createElement('div');
+  t.className='toast '+type;
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){t.remove()},4000);
+}
+</script>
+</body>
+</html>
