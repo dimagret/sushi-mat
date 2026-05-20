@@ -30,7 +30,7 @@ export interface Category {
 export const CATEGORIES: Category[] = [
   { id: 'all', label: 'Все позиции' },
   { id: 'hit', label: 'Хиты' },
-  { id: 'hot', label: 'Острое' },
+  // 'hot' removed — острые роллы вошли в основные категории
   { id: 'shawarma', label: 'Шаурма' },
   { id: 'burgers', label: 'Бургеры' },
   { id: 'rolls', label: 'Роллы' },
@@ -64,8 +64,8 @@ export const FMT = (n: number) => new Intl.NumberFormat('ru-RU').format(Math.rou
 // ═══════════════════════════════════════════════════════════
 export const ARCHIVED_ITEMS: MenuItem[] = [
   { id: 121, cats: ['shawarma'], name: 'Буртуч', desc: 'Лаваш, мясо, овощи, соус', price: 410, weight: '500 гр', tag: null },
+  { id: 8, cats: ['rolls'], name: 'Сан Райз', desc: 'Рис, нори, сыр, тунец, огурец, тобико чёрная, шапка', price: 470, weight: '330 гр', tag: null, image: '/catalog_dish_2026/dish_010.png' },
   { id: 41, cats: ['rolls'], name: 'Мидори', desc: 'Рис, нори, сыр, краб, перец, салат, огурец, масаго красная, майонез', price: 400, weight: '250 гр', tag: null, image: '/catalog_v10/dish_004.png' },
-  { id: 43, cats: ['baked'], name: 'С крабом и креветкой', desc: 'Рис, нори, краб, креветка, перец болгарский, шапка, масаго', price: 570, weight: '300 гр', tag: null, image: '/catalog_part2/dish_018.jpg' },
   { id: 51, cats: ['baked'], name: 'Сага', desc: 'Рис, нори, угорь, тунец, кунжут белый, унаги соус, шапка', price: 610, weight: '340 гр', image: '/catalog_part4/dish_002.jpeg', tag: null },
 ];
 
@@ -76,8 +76,7 @@ export const MENU: MenuItem[] = [
   { id: 3, cats: ['rolls'], name: 'Анаго', desc: 'Рис, нори, сыр, тунец, лосось, айсберг, тобико чёрная, унаги соус', price: 490, weight: '230 гр', tag: null, image: '/catalog_part10/dish-000.png' },
   { id: 5, cats: ['rolls'], name: 'Маями', desc: 'Рис, нори, сыр, угорь, краб, огурец, масаго зелёная, унаги соус', price: 500, weight: '280 гр', tag: null, image: '/catalog/dish_011.jpg' },
   { id: 6, cats: ['rolls'], name: 'Кайри', desc: 'Рис, нори, сыр, тунец, креветка, масаго зелёная, чеддер', price: 470, weight: '230 гр', tag: 'hit', image: '/catalog/dish_016.jpg' },
-  { id: 7, cats: ['rolls', 'hot'], name: 'Вулкан (острый ролл)', desc: 'Рис, нори, сыр, тунец, масаго зелёная, спайси соус, лук зелёный', price: 520, weight: '220 гр', tag: 'hot', image: '/catalog_part10/dish-001.png' },
-  { id: 8, cats: ['rolls'], name: 'Сан Райз', desc: 'Рис, нори, сыр, тунец, огурец, тобико чёрная, шапка', price: 470, weight: '330 гр', tag: null, image: '/catalog_dish_2026/dish_010.png' },
+  { id: 7, cats: ['rolls'], name: 'Вулкан (острый ролл)', desc: 'Рис, нори, сыр, тунец, масаго зелёная, спайси соус, лук зелёный', price: 520, weight: '220 гр', tag: 'hot', image: '/catalog_part10/dish-001.png' },
   { id: 11, cats: ['rolls'], name: 'Сырный ролл', desc: 'Рис, нори, сыр филадельфия, огурец, лосось, чеддер, спайс', price: 450, weight: '250 гр', tag: null, image: '/catalog/dish_007.jpg' },
   { id: 13, cats: ['rolls'], name: 'Сайтама', desc: 'Рис, нори, сыр, лосось с/с, огурец, кунжут', price: 520, weight: '230 гр', tag: null, image: '/catalog/dish_009.jpg' },
 
@@ -100,19 +99,20 @@ export const MENU: MenuItem[] = [
   // === ДРАКОНЫ ===
   { id: 34, cats: ['dragons'], name: 'Чёрный дракон', desc: 'Рис, нори, чёрная тобико, красная тобико, соус унаги, сыр филадельфия, креветка тигровая, томаго', price: 620, weight: '260 гр', tag: null , image: '/dish_photos_v2/чёрный_дракон.jpg' },
   { id: 35, cats: ['dragons', 'hit'], name: 'Золотой дракон', desc: 'Рис, нори, лосось, краб, огурец, сыр, тобико, майонез', price: 670, weight: '290 гр', tag: 'hit' , image: '/dish_photos_v2/золотой_дракон.jpg' },
-  { id: 36, cats: ['dragons', 'hot'], name: 'Красный дракон', desc: 'Рис, нори, тунец, угорь, салат, сыр, тобико, спайс соус', price: 620, weight: '290 гр', tag: 'hot' , image: '/dish_photos_v2/краснный_дракон.jpg' },
+  { id: 36, cats: ['dragons'], name: 'Красный дракон', desc: 'Рис, нори, тунец, угорь, салат, сыр, тобико, спайс соус', price: 620, weight: '290 гр', tag: 'hot' , image: '/dish_photos_v2/краснный_дракон.jpg' },
   { id: 37, cats: ['dragons'], name: 'Зелёный дракон', desc: 'Рис, нори, краб, креветка, тобико, авокадо, сыр, унаги соус', price: 670, weight: '290 гр', tag: null , image: '/dish_photos_v2/зелённый_дракон.jpg' },
   { id: 39, cats: ['rolls'], name: 'Окаяма', desc: 'Рис, нори, сыр, авокадо, лосось, угорь, унаги соус', price: 620, weight: '260 гр', tag: null, image: '/catalog_part2/dish_004.jpg' },
   { id: 40, cats: ['rolls', 'hit'], name: 'Микс ролл', desc: 'Рис, нори, креветка, авокадо, лосось, тунец, сыр, унаги соус', price: 650, weight: '300 гр', tag: 'hit', image: '/catalog_part2/dish_007.jpg' },
   // === СТРИТ-РОЛЛЫ ===
   { id: 204, cats: ['street'], name: 'Стрит ролл с лососем', desc: 'Рис, нори, огурец, сыр, лосось слабосолёный, тобика, спайс-соус', price: 440, weight: '250 гр', tag: 'new', image: '/catalog_part3/dish_001.jpg' },
   { id: 42, cats: ['baked', 'hit'], name: 'Запечённый лосось', desc: 'Рис, нори, лосось с/с, авокадо, кунжут, шапка, унаги', price: 670, weight: '300 гр', tag: 'hit', image: '/catalog/dish_015.jpg' },
+  { id: 43, cats: ['baked'], name: 'С крабом и креветкой', desc: 'Рис, нори, краб, креветка, перец болгарский, шапка, масаго', price: 570, weight: '300 гр', tag: null, image: '/catalog/с_крабом_и_креветкой_43.jpg' },
   { id: 44, cats: ['baked'], name: 'Запечённый Бона', desc: 'Рис, нори, томаго, авокадо, креветка, сыр, шапка, унаги, кунжут', price: 550, weight: '300 гр', image: '/catalog_part4/dish_003.jpeg', tag: null },
   { id: 45, cats: ['baked'], name: 'Запечённый креветка', desc: 'Рис, нори, сыр, креветка, авокадо, спайс, масаго, шапка', price: 570, weight: '280 гр', image: '/catalog_part4/dish_001.jpeg', tag: null },
   { id: 47, cats: ['baked'], name: 'Запечённый три рыбы', desc: 'Рис, нори, угорь, лосось, креветка, шапка, соус устричный, унаги', price: 690, weight: '260 гр', image: '/catalog_part2/dish_017.jpg', tag: null },
   { id: 48, cats: ['baked'], name: 'Запечённый Фила', desc: 'Рис, нори, сыр, огурец, авокадо, лосось, унаги', price: 650, weight: '310 гр', tag: null, image: '/catalog_part10/dish-002.png' },
-  { id: 49, cats: ['baked'], name: 'Тунец + лосось', desc: 'Рис, нори, тунец, лосось с/с, масаго красная, шапка', price: 690, weight: '280 гр', tag: 'new', image: '/catalog_dish_2026/dish_012.png' },
-  { id: 52, cats: ['rolls'], name: 'Сендай', desc: 'Рис, нори, сыр филадельфия, чеддер, краб, шапка', price: 470, weight: '320 гр', image: '/catalog_part4/dish_004.jpeg', tag: null },
+  { id: 49, cats: ['baked'], name: 'Тунец + лосось', desc: 'Рис, нори, тунец, лосось с/с, масаго красная, шапка', price: 690, weight: '280 гр', tag: 'new', image: '/catalog/тунец_лосось_49.jpg' },
+  { id: 52, cats: ['rolls'], name: 'Сендай', desc: 'Сыр, креветка, авокадо, лосось, спайс соус', price: 700, weight: '320 гр', image: '/catalog_part4/dish_004.jpeg', tag: null },
 
 
   // === ЖАРЕНЫЕ РОЛЛЫ ===
@@ -192,6 +192,9 @@ export const DELIVERY_ZONES = [
   { id: 'cherry', name: 'Черёмушки', freeFrom: 2000, price: 250, isSelf: false, isHere: false },
   { id: 'center', name: 'Центр города', freeFrom: 1500, price: 250, isSelf: false, isHere: false },
   { id: 'mirny', name: 'пос. Мирный', freeFrom: 3000, price: 250, isSelf: false, isHere: false },
+  { id: 'rayon20', name: '20 Райн', freeFrom: 1200, price: 250, isSelf: false, isHere: false },
+  { id: 'rayon17', name: '17 район', freeFrom: 1200, price: 250, isSelf: false, isHere: false },
+  { id: 'rayon23', name: '23 район', freeFrom: 1200, price: 250, isSelf: false, isHere: false },
   { id: 'self', name: 'Самовывоз', freeFrom: 0, price: 0, isSelf: true, isHere: false },
 ];
 

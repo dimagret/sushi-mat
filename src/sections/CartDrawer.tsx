@@ -83,7 +83,43 @@ export default function CartDrawer({
       // Silently fail — order still accepted, Telegram is optional
     }
 
-    // Show success regardless of Telegram
+    // Always try MAX silently (internal only)
+    try {
+      const maxSettingsRaw = localStorage.getItem('max_settings');
+      if (maxSettingsRaw) {
+        const maxSettings = JSON.parse(maxSettingsRaw);
+        if (maxSettings.botToken && maxSettings.chatId) {
+          const itemsText = cart.map((ci) => `  • ${ci.item.name} x${ci.quantity} = ${FMT(calcItemPrice(ci.item, ci.selectedOptions) * ci.quantity)}`).join('\n');
+          const message = `🍣 <b>Новый заказ Суши Мать #${orderNumber}!</b>\n\n` +
+            `👤 <b>Имя:</b> ${form.name}\n` +
+            `📱 <b>Телефон:</b> ${form.phone}\n` +
+            `📍 <b>Адрес:</b> ${form.address || 'Самовывоз'}\n` +
+            `🕐 <b>Время:</b> ${form.time}\n` +
+            (form.comment ? `💬 <b>Комментарий:</b> ${form.comment}\n` : '') +
+            `\n📋 <b>Заказ:</b>\n${itemsText}\n\n` +
+            (promoApplied ? `🎁 <b>Промокод:</b> −${FMT(promoDiscount)}\n` : '') +
+            `🚚 <b>Доставка:</b> ${deliveryPrice === 0 ? 'Бесплатно' : FMT(deliveryPrice)}\n` +
+            `💰 <b>Итого:</b> <b>${FMT(finalTotal)}</b>`;
+
+          await fetch('https://platform-api.max.ru/messages', {
+            method: 'POST',
+            headers: {
+              'Authorization': maxSettings.botToken,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              chat_id: parseInt(maxSettings.chatId),
+              text: message,
+              format: 'html'
+            }),
+          });
+        }
+      }
+    } catch {
+      // Silently fail — order still accepted, MAX is optional
+    }
+
+    // Show success regardless of delivery channel
     setStep('success');
     setTimeout(() => {
       onClear();
