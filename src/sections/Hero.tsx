@@ -66,7 +66,7 @@ export default function Hero() {
           <div className="hero-anim mt-1 flex flex-wrap gap-x-5 gap-y-2 text-xs text-white/50 md:gap-x-6 md:text-sm">
             <span className="flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5 text-[#D4A853] md:h-4 md:w-4" />
-              Доставка от 45 мин · Бесплатно от 1000 ₽
+              Доставка от 45 мин · от 250 ₽
             </span>
             <span className="flex items-center gap-1.5">
               <MapPin className="h-3.5 w-3.5 text-[#D4A853] md:h-4 md:w-4" />
@@ -112,7 +112,7 @@ export default function Hero() {
           {/* Floating badges — repositioned for mobile */}
           <div className="absolute -bottom-10 left-0 z-10 rounded-xl border border-[#D4A853]/20 bg-[#0A0A0D]/90 px-3 py-2 shadow-lg backdrop-blur md:-bottom-2 md:-left-2">
             <div className="text-[10px] text-white/50">Сегодня готовим</div>
-            <div className="text-sm font-bold text-[#D4A853] md:text-base">84 позиции</div>
+            <div className="text-sm font-bold text-[#D4A853] md:text-base">80+ блюд</div>
           </div>
           <div className="absolute -right-2 top-0 z-10 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1.5 backdrop-blur md:-right-1 md:top-4 md:px-3 md:py-2">
             <div className="text-[9px] font-bold uppercase tracking-wider text-emerald-400 md:text-[10px]">Открыто</div>

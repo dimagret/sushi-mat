@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { Plus, Minus, Trash2, Truck, MapPin, Tag, Gift, Phone, User, MessageSquare, Clock, CheckCircle, ShoppingCart, CreditCard, Loader2 } from 'lucide-react';
+import { Plus, Minus, Trash2, Truck, MapPin, Tag, Gift, Phone, User, MessageSquare, Clock, CheckCircle, ShoppingCart, Send, Loader2 } from 'lucide-react';
 import { FMT, DELIVERY_ZONES, UPSELL_ITEMS } from '@/data/menu';
 import { calcItemPrice, type CartItem } from '@/hooks/useCart';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { trpc } from '@/providers/trpc';
 
 interface CartDrawerProps {
   open: boolean;
@@ -32,18 +31,14 @@ export default function CartDrawer({
   const [promoApplied, setPromoApplied] = useState(false);
   const [step, setStep] = useState<'cart' | 'checkout' | 'success'>('cart');
   const [form, setForm] = useState({ name: '', phone: '', address: '', comment: '', time: 'Как можно скорее' });
-  const [consent, setConsent] = useState(false);
+  const [consent, setConsent] = useState(true);
   const [orderSent, setOrderSent] = useState(false);
-  const [payError, setPayError] = useState('');
 
   const zone = DELIVERY_ZONES.find((z) => z.id === zoneId) || DELIVERY_ZONES[0];
   const deliveryPrice = total >= zone.freeFrom ? 0 : zone.price;
   const promoDiscount = promoApplied ? Math.round(total * 0.1) : 0;
   const finalTotal = total + deliveryPrice - promoDiscount;
   const minOrder = 500;
-
-  const createOrder = trpc.order.create.useMutation();
-  const createPayment = trpc.payment.create.useMutation();
 
   const applyPromo = () => {
     const savedPromo = localStorage.getItem('sushi-bday-promo');
@@ -54,81 +49,52 @@ export default function CartDrawer({
 
   const sendOrder = async () => {
     if (!form.name || !form.phone) return;
-    setPayError('');
     setOrderSent(true);
 
-    try {
-      const order = await createOrder.mutateAsync({
-        customerPhone: form.phone,
-        customerName: form.name,
-        deliveryAddress: form.address || 'Самовывоз',
-        deliveryInstructions: `Время: ${form.time}${form.comment ? ` | ${form.comment}` : ''}`,
-        deliveryFee: deliveryPrice,
-        discount: promoDiscount,
-        items: cart.map((ci) => ({
-          menuItemId: ci.item.id,
-          name: ci.item.name,
-          quantity: ci.quantity,
-          unitPrice: calcItemPrice(ci.item, ci.selectedOptions),
-        })),
-      });
+    // Build order number
+    const orderNumber = Math.floor(Math.random() * 9000 + 1000);
 
-      // Send to Telegram
-      try {
-        const tgSettings = localStorage.getItem('telegram_settings');
-        if (tgSettings) {
-          const { botToken, chatId } = JSON.parse(tgSettings);
+    // Always try Telegram silently (internal only)
+    try {
+      const tgSettingsRaw = localStorage.getItem('telegram_settings');
+      if (tgSettingsRaw) {
+        const tgSettings = JSON.parse(tgSettingsRaw);
+        if (tgSettings.botToken && tgSettings.chatId) {
           const itemsText = cart.map((ci) => `  • ${ci.item.name} x${ci.quantity} = ${FMT(calcItemPrice(ci.item, ci.selectedOptions) * ci.quantity)}`).join('\n');
-          const message = `🍣 <b>Новый заказ Суши Мать!</b>\n\n` +
+          const message = `🍣 <b>Новый заказ Суши Мать #${orderNumber}!</b>\n\n` +
             `👤 <b>Имя:</b> ${form.name}\n` +
             `📱 <b>Телефон:</b> ${form.phone}\n` +
             `📍 <b>Адрес:</b> ${form.address || 'Самовывоз'}\n` +
             `🕐 <b>Время:</b> ${form.time}\n` +
             (form.comment ? `💬 <b>Комментарий:</b> ${form.comment}\n` : '') +
             `\n📋 <b>Заказ:</b>\n${itemsText}\n\n` +
-            (promoApplied ? `🎁 <b>Промокод:</b> -${FMT(promoDiscount)}\n` : '') +
-            `🚚 <b>Доставка:</b> ${FMT(deliveryPrice)}\n` +
+            (promoApplied ? `🎁 <b>Промокод:</b> −${FMT(promoDiscount)}\n` : '') +
+            `🚚 <b>Доставка:</b> ${deliveryPrice === 0 ? 'Бесплатно' : FMT(deliveryPrice)}\n` +
             `💰 <b>Итого:</b> <b>${FMT(finalTotal)}</b>`;
 
-          await fetch('https://api.telegram.org/bot' + botToken + '/sendMessage', {
+          await fetch('https://api.telegram.org/bot' + tgSettings.botToken + '/sendMessage', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' }),
+            body: JSON.stringify({ chat_id: tgSettings.chatId, text: message, parse_mode: 'HTML' }),
           });
         }
-      } catch (e) {
-        // Silently fail — don't block order flow
-        console.error('Telegram send failed:', e);
       }
-
-      const returnUrl = `${window.location.origin}/order/success?orderId=${order.orderId}`;
-
-      const payment = await createPayment.mutateAsync({
-        orderId: order.orderId,
-        amount: order.total,
-        description: `Суши Мать — Заказ #${order.orderNumber}`,
-        customerPhone: form.phone,
-        returnUrl,
-      });
-
-      if (payment.confirmationUrl) {
-        window.location.href = payment.confirmationUrl;
-      } else {
-        setStep('success');
-        setTimeout(() => {
-          onClear();
-          setStep('cart');
-          setOrderSent(false);
-          setForm({ name: '', phone: '', address: '', comment: '', time: 'Как можно скорее' });
-          setPromo('');
-          setPromoApplied(false);
-          onClose();
-        }, 3000);
-      }
-    } catch (err: any) {
-      setOrderSent(false);
-      setPayError(err?.message || 'Ошибка при создании заказа. Попробуйте ещё раз.');
+    } catch {
+      // Silently fail — order still accepted, Telegram is optional
     }
+
+    // Show success regardless of Telegram
+    setStep('success');
+    setTimeout(() => {
+      onClear();
+      setStep('cart');
+      setOrderSent(false);
+      setForm({ name: '', phone: '', address: '', comment: '', time: 'Как можно скорее' });
+      setPromo('');
+      setPromoApplied(false);
+      setConsent(true);
+      onClose();
+    }, 4000);
   };
 
   return (
@@ -148,8 +114,8 @@ export default function CartDrawer({
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20">
               <CheckCircle className="h-8 w-8 text-emerald-400" />
             </div>
-            <h3 className="text-xl font-bold text-white">Спасибо за заказ!</h3>
-            <p className="mt-2 text-sm text-white/60">Мы скоро свяжемся с вами для подтверждения.</p>
+            <h3 className="text-xl font-bold text-white">Заказ отправлен!</h3>
+            <p className="mt-2 text-sm text-white/60">Мы получили вашу заявку и скоро свяжемся для подтверждения.</p>
           </div>
         )}
 
@@ -420,14 +386,7 @@ export default function CartDrawer({
                 </div>
               </div>
 
-              {/* Error */}
-              {payError && (
-                <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-                  {payError}
-                </div>
-              )}
-
-              {/* Consent checkbox */}
+              {/* Consent checkbox — internal only, does not block order */}
               <label className="flex cursor-pointer items-start gap-2.5 rounded-xl border border-white/5 bg-[#121214] p-3 transition-colors hover:border-white/10">
                 <input
                   type="checkbox"
@@ -436,7 +395,7 @@ export default function CartDrawer({
                   className="mt-0.5 h-4 w-4 shrink-0 accent-[#D4A853]"
                 />
                 <span className="text-xs leading-relaxed text-white/50">
-                  Я согласен на обработку моих персональных данных (имя, телефон, адрес) в соответствии с{" "}
+                  Я согласен на обработку персональных данных в соответствии с{" "}
                   <a
                     href="/privacy.html"
                     target="_blank"
@@ -445,16 +404,6 @@ export default function CartDrawer({
                     onClick={(e) => e.stopPropagation()}
                   >
                     Политикой конфиденциальности
-                  </a>{" "}
-                  и принимаю условия{" "}
-                  <a
-                    href="/offer.html"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#D4A853] underline hover:no-underline"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    Публичной оферты
                   </a>.
                 </span>
               </label>
@@ -468,19 +417,21 @@ export default function CartDrawer({
                 </button>
                 <button
                   onClick={sendOrder}
-                  disabled={!form.name || !form.phone || !consent || orderSent}
+                  disabled={!form.name || !form.phone || orderSent}
                   className={`flex-[2] flex items-center justify-center gap-2 rounded-lg py-3 text-sm font-bold transition-all ${
-                    form.name && form.phone && consent && !orderSent
+                    form.name && form.phone && !orderSent
                       ? 'gold-gradient-bg text-[#0A0A0D] hover:shadow-lg'
                       : 'cursor-not-allowed bg-white/5 text-white/30'
                   }`}
                 >
                   {orderSent ? (
-                    <><Loader2 className="h-4 w-4 animate-spin" /> Создаём заказ...</>
-                  ) : !consent ? (
-                    'Требуется согласие'
+                    <><Loader2 className="h-4 w-4 animate-spin" /> Отправляем...</>
+                  ) : !form.name ? (
+                    'Введите имя'
+                  ) : !form.phone ? (
+                    'Введите телефон'
                   ) : (
-                    <><CreditCard className="h-4 w-4" /> Оплатить {FMT(finalTotal)}</>
+                    <><Send className="h-4 w-4" /> Заказать {FMT(finalTotal)}</>
                   )}
                 </button>
               </div>

@@ -115,25 +115,17 @@
 <script>
 var items = [];
 var uploads = {};
-var apiOnline = false;
 
-// Check if API is available
-fetch('/api/upload',{method:'HEAD'}).then(function(){apiOnline=true;setMode(true)}).catch(function(){apiOnline=false;setMode(false)});
-
-function setMode(online){
+function setMode(){
   var bar=document.getElementById('modeBar');
   var txt=document.getElementById('modeText');
-  if(online){
-    bar.className='mode-bar online';
-    txt.innerHTML='<span class="mode-online">● API активен — фото сохраняются напрямую</span>';
-  } else {
-    bar.className='mode-bar offline';
-    txt.innerHTML='<span class="mode-offline">● API недоступен — используйте "Скопировать код" и отправьте мне фото</span>';
-  }
+  bar.className='mode-bar offline';
+  txt.innerHTML='<span class="mode-offline">● Режим: выберите фото → скачайте файл → отправьте мне код + фото</span>';
 }
 
 fetch('./menu-data.json').then(function(r){return r.json()}).then(function(data){
   items=data;
+  setMode();
   updateStats();
   renderMissing();
   renderWith();
@@ -170,45 +162,47 @@ function doSearch(q){
   document.getElementById('grid-all').innerHTML=f.map(function(i){return card(i,!i.image)}).join('')||'<div class="empty-state">Ничего не найдено</div>';
 }
 
+function buildUploadHtml(id,isReplace){
+  var labelId=isReplace?'rup-':'up-';
+  var pvId=isReplace?'rpv-':'pv-';
+  var btnId=isReplace?'rbt-':'bt-';
+  var codeId=isReplace?'rcb-':'cb-';
+  var rsId=isReplace?'rrs-':'rs-';
+  var onCh=isReplace?'onReplace':'onSelect';
+  var btnLabel=isReplace?'📥 Скачать + код замены':'📥 Скачать фото + код';
+  var areaBorder=isReplace?'border-color:#e67e2255':'';
+  var labelColor=isReplace?'color:#e67e22':'';
+  var btnClass=isReplace?'btn btn-danger':'btn btn-primary';
+  return '<label class="upload-area" for="'+labelId+id+'" style="'+areaBorder+'">'+
+      '<input type="file" id="'+labelId+id+'" accept="image/*" onchange="'+onCh+'('+id+',this)">'+
+      '<div style="'+labelColor+'">📷 <strong>Выбрать фото</strong></div>'+
+      '<img class="upload-preview" id="'+pvId+id+'">'+
+    '</label>'+
+    '<button class="'+btnClass+'" id="'+btnId+id+'" onclick="'+(isReplace?'doReplace':'doSave')+'('+id+')" disabled>'+btnLabel+'</button>'+
+    '<div class="code-box" id="'+codeId+id+'"></div>'+
+    '<div class="result-msg" id="'+rsId+id+'"></div>';
+}
+
 function card(item,showUpload){
   var has=!!item.image;
   var photo=has
-    ?'<img class="item-photo" src="'+item.image+'" alt="'+item.name+'" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="item-photo placeholder" style="display:none">Ошибка</div>'
+    ?'<img class="item-photo" src="'+item.image+'" alt="'+item.name+'" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="item-photo placeholder" style="display:none">Ошибка загрузки</div>'
     :'<div class="item-photo placeholder" id="ph-'+item.id+'">Нет фото</div>';
   var cats=item.cats?item.cats.join(', '):'';
-  var uploadHtml='';
 
-  if(showUpload&&!has){
-    uploadHtml=
-      '<label class="upload-area" for="up-'+item.id+'">'+
-        '<input type="file" id="up-'+item.id+'" accept="image/*" onchange="onSelect('+item.id+',this)">'+
-        '<div>📷 <strong>Выбрать фото</strong></div>'+
-        '<img class="upload-preview" id="pv-'+item.id+'">'+
-      '</label>'+
-      '<div class="progress-bar" id="pb-'+item.id+'"><div class="progress-fill" id="pf-'+item.id+'"></div></div>'+
-      '<button class="btn btn-primary" id="bt-'+item.id+'" onclick="doSave('+item.id+')" disabled>💾 Сохранить на сайт</button>'+
-      '<button class="btn btn-primary" id="cp-'+item.id+'" onclick="copyCode('+item.id+')" disabled style="display:none;background:#3498db">📋 Скопировать код</button>'+
-      '<div class="code-box" id="cb-'+item.id+'"></div>'+
-      '<div class="result-msg" id="rs-'+item.id+'"></div>';
+  // Direct upload for items without photo (when showUpload=true)
+  var directUpload='';
+  if(showUpload && !has){
+    directUpload=buildUploadHtml(item.id,false);
   }
 
-  var replaceHtml='';
+  // Replace section for items with photo (always available)
+  var replaceSection='';
   if(has){
-    replaceHtml=
+    replaceSection=
       '<div class="replace-section">'+
         '<button class="replace-toggle" onclick="toggleRp('+item.id+')">🔄 Заменить фото</button>'+
-        '<div class="replace-area" id="rp-'+item.id+'">'+
-          '<label class="upload-area" for="rup-'+item.id+'" style="border-color:#e67e2255">'+
-            '<input type="file" id="rup-'+item.id+'" accept="image/*" onchange="onReplace('+item.id+',this)">'+
-            '<div style="color:#e67e22">📷 <strong>Выбрать новое фото</strong></div>'+
-            '<img class="upload-preview" id="rpv-'+item.id+'">'+
-          '</label>'+
-          '<div class="progress-bar" id="rpb-'+item.id+'"><div class="progress-fill" id="rpf-'+item.id+'"></div></div>'+
-          '<button class="btn btn-danger" id="rbt-'+item.id+'" onclick="doReplace('+item.id+')" disabled>💾 Заменить на сайте</button>'+
-          '<button class="btn btn-primary" id="rcp-'+item.id+'" onclick="copyReplaceCode('+item.id+')" disabled style="display:none;background:#3498db">📋 Скопировать код замены</button>'+
-          '<div class="code-box" id="rcb-'+item.id+'"></div>'+
-          '<div class="result-msg" id="rrs-'+item.id+'"></div>'+
-        '</div>'+
+        '<div class="replace-area" id="rp-'+item.id+'">'+buildUploadHtml(item.id,true)+'</div>'+
       '</div>';
   }
 
@@ -217,7 +211,7 @@ function card(item,showUpload){
       '<div class="item-name">'+item.name+'</div>'+
       '<div class="item-meta">ID: '+item.id+' | '+item.price+'₽ | '+cats+'</div>'+
       '<span class="item-status '+(has?'status-ok':'status-missing')+'">'+(has?'✓ С фото':'✗ Без фото')+'</span>'+
-      uploadHtml+replaceHtml+
+      directUpload+replaceSection+
     '</div></div>';
 }
 
@@ -244,15 +238,8 @@ function onSelect(id,input){
     pv.style.display='block';
     var ph=document.getElementById('ph-'+id);
     if(ph)ph.style.display='none';
-    if(apiOnline){
-      document.getElementById('bt-'+id).disabled=false;
-      document.getElementById('cp-'+id).style.display='none';
-    }else{
-      document.getElementById('bt-'+id).style.display='none';
-      document.getElementById('cp-'+id).style.display='block';
-      document.getElementById('cp-'+id).disabled=false;
-      showCode(id);
-    }
+    document.getElementById('bt-'+id).disabled=false;
+    showCode(id);
   };
   reader.readAsDataURL(file);
 }
@@ -267,15 +254,8 @@ function onReplace(id,input){
     var pv=document.getElementById('rpv-'+id);
     pv.src=e.target.result;
     pv.style.display='block';
-    if(apiOnline){
-      document.getElementById('rbt-'+id).disabled=false;
-      document.getElementById('rcp-'+id).style.display='none';
-    }else{
-      document.getElementById('rbt-'+id).style.display='none';
-      document.getElementById('rcp-'+id).style.display='block';
-      document.getElementById('rcp-'+id).disabled=false;
-      showReplaceCode(id);
-    }
+    document.getElementById('rbt-'+id).disabled=false;
+    showReplaceCode(id);
   };
   reader.readAsDataURL(file);
 }
@@ -304,7 +284,7 @@ function showCode(id){
   box.textContent=code;
   box.classList.add('show');
   var rs=document.getElementById('rs-'+id);
-  rs.innerHTML='API недоступен. Скопируй код выше и отправь мне вместе с файлом фото.';
+  rs.innerHTML='Нажмите кнопку выше, чтобы скачать фото и скопировать код';
   rs.className='result-msg show result-info';
 }
 
@@ -317,98 +297,44 @@ function showReplaceCode(id){
   box.textContent=code;
   box.classList.add('show');
   var rs=document.getElementById('rrs-'+id);
-  rs.innerHTML='API недоступен. Скопируй код выше и отправь мне вместе с файлом фото.';
+  rs.innerHTML='Нажмите кнопку выше, чтобы скачать фото и скопировать код замены';
   rs.className='result-msg show result-info';
 }
 
-function copyCode(id){
+function downloadFile(file,filename){
+  var url=URL.createObjectURL(file);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);a.remove()},1000);
+}
+
+function doSave(id){
   var up=uploads[id];
-  if(!up)return;
+  if(!up||!up.file)return;
   var fn=getFilename(id,up.item.name,up.file.name);
   var code=getCode(id,fn);
+  downloadFile(up.file,fn);
   navigator.clipboard.writeText(code).then(function(){
-    showToast('Код скопирован! Отправь мне код + файл фото','success');
-  }).catch(function(){prompt('Скопируй:',code)});
+    showToast('✓ Фото скачано, код скопирован! Отправь мне файл + код','success');
+  }).catch(function(){
+    prompt('Код скопируй:',code);
+  });
 }
-function copyReplaceCode(id){
+
+function doReplace(id){
   var up=uploads[id];
-  if(!up)return;
+  if(!up||!up.file)return;
   var fn=getFilename(id,up.item.name,up.file.name);
   var code='// ЗАМЕНА: '+up.item.name+'\n// Старое: '+up.item.image+'\n// Новое:  /catalog/'+fn+'\n'+getCode(id,fn);
+  downloadFile(up.file,fn);
   navigator.clipboard.writeText(code).then(function(){
-    showToast('Код замены скопирован! Отправь мне код + файл фото','success');
-  }).catch(function(){prompt('Скопируй:',code)});
-}
-
-function setProgress(id,pct,isR){
-  var p=(isR?'r':'');
-  document.getElementById(p+'pb-'+id).classList.add('active');
-  document.getElementById(p+'pf-'+id).style.width=pct+'%';
-}
-function showResult(id,msg,isErr,isR){
-  var rs=document.getElementById((isR?'r':'')+'rs-'+id);
-  rs.textContent=msg;
-  rs.className='result-msg show '+(isErr?'result-error':'result-success');
-}
-
-async function doSave(id){
-  var up=uploads[id];
-  if(!up)return;
-  setProgress(id,20,false);
-  try{
-    var fd=new FormData();
-    fd.append('file',up.file);
-    fd.append('itemId',String(id));
-    fd.append('itemName',up.item.name);
-    var resp=await fetch('/api/upload',{method:'POST',body:fd});
-    var result=await resp.json();
-    if(!result.success){showResult(id,'Ошибка: '+(result.error||'unknown'),true,false);return}
-    setProgress(id,70,false);
-    var r2=await fetch('/api/trpc/menu.updateImage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({json:{itemId:id,imagePath:result.path}})});
-    var j2=await r2.json();
-    setProgress(id,100,false);
-    if(j2.result?.data?.json?.success){
-      showResult(id,'✓ Фото сохранено!',false,false);
-      up.item.image=result.path;
-      uploads[id]=null;
-      updateStats();
-      setTimeout(function(){renderMissing();renderWith();renderAll()},1500);
-    }else{
-      showResult(id,'Файл загружен, но меню не обновлено: '+(j2.result?.data?.json?.error||''),true,false);
-    }
-  }catch(e){
-    showResult(id,'Ошибка сети: '+e.message,true,false);
-  }
-}
-
-async function doReplace(id){
-  var up=uploads[id];
-  if(!up)return;
-  setProgress(id,20,true);
-  try{
-    var fd=new FormData();
-    fd.append('file',up.file);
-    fd.append('itemId',String(id));
-    fd.append('itemName',up.item.name);
-    var resp=await fetch('/api/upload',{method:'POST',body:fd});
-    var result=await resp.json();
-    if(!result.success){showResult(id,'Ошибка: '+(result.error||'unknown'),true,true);return}
-    setProgress(id,70,true);
-    var r2=await fetch('/api/trpc/menu.updateImage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({json:{itemId:id,imagePath:result.path}})});
-    var j2=await r2.json();
-    setProgress(id,100,true);
-    if(j2.result?.data?.json?.success){
-      showResult(id,'✓ Фото заменено!',false,true);
-      up.item.image=result.path;
-      uploads[id]=null;
-      updateStats();
-      setTimeout(function(){renderWith();renderAll()},1500);
-    }else{
-      showResult(id,'Файл загружен, но меню не обновлено',true,true);
-    }
-  }catch(e){
-    showResult(id,'Ошибка сети: '+e.message,true,true);
-  }
+    showToast('✓ Фото скачано, код замены скопирован! Отправь мне файл + код','success');
+  }).catch(function(){
+    prompt('Код замены скопируй:',code);
+  });
 }
 
 function showToast(msg,type){
