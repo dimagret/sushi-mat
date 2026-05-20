@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Telegram-уведомления — Суши Мать</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0A0A0D; color: #fff; padding: 20px; }
+  h1 { color: #D4A853; margin-bottom: 10px; font-size: 24px; }
+  .subtitle { color: #888; margin-bottom: 25px; font-size: 14px; }
+  
+  .card { background: #121214; border: 1px solid #333; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+  .card-title { color: #D4A853; font-size: 16px; font-weight: bold; margin-bottom: 15px; }
+  
+  .form-group { margin-bottom: 15px; }
+  .form-group label { display: block; font-size: 13px; color: #aaa; margin-bottom: 6px; }
+  .form-group input {
+    width: 100%; padding: 12px 15px; background: #1A1A1D; border: 1px solid #333;
+    border-radius: 8px; color: #fff; font-size: 14px; font-family: monospace;
+  }
+  .form-group input:focus { outline: none; border-color: #D4A853; }
+  .form-group .hint { font-size: 11px; color: #666; margin-top: 5px; }
+  
+  .btn {
+    padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: all 0.2s;
+  }
+  .btn-primary { background: #D4A853; color: #0A0A0D; }
+  .btn-primary:hover { background: #E8C056; }
+  .btn-secondary { background: #333; color: #fff; margin-left: 10px; }
+  .btn-secondary:hover { background: #444; }
+  
+  .guide { background: #D4A85308; border: 1px solid #D4A85333; border-radius: 12px; padding: 20px; }
+  .guide-step { display: flex; gap: 12px; margin-bottom: 15px; align-items: flex-start; }
+  .guide-step-num { background: #D4A853; color: #0A0A0D; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; flex-shrink: 0; }
+  .guide-step-text { font-size: 14px; line-height: 1.5; color: #ccc; }
+  .guide-step-text code { background: #222; padding: 2px 8px; border-radius: 4px; color: #D4A853; font-size: 12px; }
+  .guide-step-text a { color: #D4A853; text-decoration: none; }
+  .guide-step-text a:hover { text-decoration: underline; }
+  
+  .status { padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 14px; display: none; }
+  .status.show { display: block; }
+  .status-success { background: #2ecc4022; border: 1px solid #2ecc40; color: #2ecc40; }
+  .status-error { background: #e74c3c22; border: 1px solid #e74c3c; color: #e74c3c; }
+  
+  .nav { margin-bottom: 20px; }
+  .nav a { color: #888; text-decoration: none; font-size: 14px; }
+  .nav a:hover { color: #D4A853; }
+</style>
+</head>
+<body>
+  <div class="nav"><a href="./photos.html">← Назад к фото</a></div>
+  
+  <h1>📱 Telegram-уведомления о заказах</h1>
+  <p class="subtitle">Настройте бота, чтобы заказы приходили в Telegram</p>
+  
+  <div class="card">
+    <div class="card-title">Настройки бота</div>
+    
+    <div class="form-group">
+      <label>Bot Token (от @BotFather)</label>
+      <input type="text" id="botToken" placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz">
+      <div class="hint">Выглядит как: 123456789:ABCdef...</div>
+    </div>
+    
+    <div class="form-group">
+      <label>Chat ID (куда отправлять)</label>
+      <input type="text" id="chatId" placeholder="-1001234567890 или 123456789">
+      <div class="hint">ID группы (с -) или ваш личный ID</div>
+    </div>
+    
+    <button class="btn btn-primary" onclick="saveSettings()">💾 Сохранить</button>
+    <button class="btn btn-secondary" onclick="testConnection()">🧪 Тестовое сообщение</button>
+    
+    <div class="status" id="status"></div>
+  </div>
+  
+  <div class="guide">
+    <div class="card-title">📋 Инструкция по созданию бота</div>
+    
+    <div class="guide-step">
+      <div class="guide-step-num">1</div>
+      <div class="guide-step-text">Напишите <a href="https://t.me/BotFather" target="_blank">@BotFather</a> в Telegram</div>
+    </div>
+    <div class="guide-step">
+      <div class="guide-step-num">2</div>
+      <div class="guide-step-text">Отправьте <code>/newbot</code> и следуйте инструкциям</div>
+    </div>
+    <div class="guide-step">
+      <div class="guide-step-num">3</div>
+      <div class="guide-step-text">Скопируйте токен (вида <code>123456789:ABC...</code>) и вставьте выше</div>
+    </div>
+    <div class="guide-step">
+      <div class="guide-step-num">4</div>
+      <div class="guide-step-text">Напишите <a href="https://t.me/userinfobot" target="_blank">@userinfobot</a> чтобы узнать свой Chat ID</div>
+    </div>
+    <div class="guide-step">
+      <div class="guide-step-num">5</div>
+      <div class="guide-step-text">Нажмите «Сохранить» и «Тестовое сообщение» для проверки</div>
+    </div>
+  </div>
+
+<script>
+// Load saved settings
+var saved = localStorage.getItem('telegram_settings');
+if (saved) {
+  var s = JSON.parse(saved);
+  document.getElementById('botToken').value = s.botToken || '';
+  document.getElementById('chatId').value = s.chatId || '';
+}
+
+function saveSettings() {
+  var token = document.getElementById('botToken').value.trim();
+  var chatId = document.getElementById('chatId').value.trim();
+  
+  if (!token || !chatId) {
+    showStatus('Заполните оба поля!', 'error');
+    return;
+  }
+  
+  localStorage.setItem('telegram_settings', JSON.stringify({ botToken: token, chatId: chatId }));
+  showStatus('✅ Настройки сохранены!', 'success');
+}
+
+function testConnection() {
+  var token = document.getElementById('botToken').value.trim();
+  var chatId = document.getElementById('chatId').value.trim();
+  
+  if (!token || !chatId) {
+    showStatus('Заполните оба поля!', 'error');
+    return;
+  }
+  
+  showStatus('⏳ Отправка...', 'success');
+  
+  fetch('https://api.telegram.org/bot' + token + '/sendMessage', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: '🧪 Тестовое сообщение от Суши Мать!\n\nЕсли вы видите это сообщение, значит бот настроен правильно. ✅',
+      parse_mode: 'HTML'
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.ok) {
+      showStatus('✅ Тестовое сообщение отправлено! Проверьте Telegram.', 'success');
+    } else {
+      showStatus('❌ Ошибка: ' + (data.description || 'Неизвестная ошибка'), 'error');
+    }
+  })
+  .catch(function(e) {
+    showStatus('❌ Ошибка сети: ' + e.message, 'error');
+  });
+}
+
+function showStatus(msg, type) {
+  var el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status show status-' + type;
+}
+</script>
+</body>
+</html>

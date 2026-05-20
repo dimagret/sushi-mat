@@ -1,0 +1,8 @@
+node_modules
+dist
+*.log
+pdfs/
+catalog*/
+dish_photos_v2/
+images/
+videos/

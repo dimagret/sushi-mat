@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Проверка фото — Суши Мать</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0A0A0D; color: #fff; padding: 20px; }
+  h1 { color: #D4A853; text-align: center; margin-bottom: 10px; font-size: 22px; }
+  .subtitle { text-align: center; color: #888; margin-bottom: 20px; font-size: 14px; }
+  .progress { text-align: center; margin-bottom: 20px; font-size: 16px; color: #D4A853; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
+  .card { background: #121214; border: 2px solid #333; border-radius: 12px; overflow: hidden; transition: all 0.2s; }
+  .card:hover { border-color: #555; }
+  .card.approved { border-color: #2ecc40; }
+  .card.rejected { border-color: #e74c3c; opacity: 0.7; }
+  .card img { width: 100%; height: 200px; object-fit: cover; display: block; background: #1A1A1D; }
+  .card-body { padding: 15px; }
+  .card-name { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
+  .card-id { font-size: 12px; color: #888; }
+  .card-desc { font-size: 12px; color: #aaa; margin: 8px 0; line-height: 1.4; }
+  .card-file { font-size: 10px; color: #666; word-break: break-all; margin-bottom: 10px; }
+  .btn-row { display: flex; gap: 10px; }
+  .btn { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; transition: all 0.2s; }
+  .btn-yes { background: #2ecc4022; color: #2ecc40; border: 1px solid #2ecc40; }
+  .btn-yes:hover, .btn-yes.active { background: #2ecc40; color: #fff; }
+  .btn-no { background: #e74c3c22; color: #e74c3c; border: 1px solid #e74c3c; }
+  .btn-no:hover, .btn-no.active { background: #e74c3c; color: #fff; }
+  .actions { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 10px; z-index: 100; }
+  .fab { padding: 15px 25px; border: none; border-radius: 50px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+  .fab-primary { background: #D4A853; color: #0A0A0D; }
+  .fab-primary:hover { background: #E8C056; }
+  .fab-secondary { background: #333; color: #fff; }
+  .result-box { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #121214; border: 1px solid #D4A853; border-radius: 12px; padding: 20px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; z-index: 200; display: none; }
+  .result-box.show { display: block; }
+  .result-box h3 { color: #D4A853; margin-bottom: 15px; }
+  .result-box pre { background: #0A0A0D; padding: 15px; border-radius: 8px; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
+  .result-box .close { float: right; background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; }
+  .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 150; display: none; }
+  .overlay.show { display: block; }
+  .legend { display: flex; gap: 20px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .legend-dot { width: 16px; height: 16px; border-radius: 4px; }
+  .legend-dot.pending { background: #333; }
+  .legend-dot.approved { background: #2ecc40; }
+  .legend-dot.rejected { background: #e74c3c; }
+</style>
+</head>
+<body>
+<h1>🔍 Проверка фото меню</h1>
+<p class="subtitle">Нажми ДА если фото подходит к блюду, НЕТ если не подходит</p>
+<div class="progress" id="progress">Проверено: 0 / 47</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot pending"></div> Не проверено</div>
+  <div class="legend-item"><div class="legend-dot approved"></div> Подходит (да)</div>
+  <div class="legend-item"><div class="legend-dot rejected"></div> Не подходит (нет)</div>
+</div>
+
+<div class="grid">
+
+<div class="card" id="card-1" data-id="1">
+  <img src="/catalog_part2/dish_006.jpg" alt="Динамит" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Динамит</div>
+    <div class="card-id">ID: 1</div>
+    <div class="card-desc">Рис, нори, сыр, авокадо, кусочки манго, белый кунжут, шапочка, соус манго, чили</div>
+    <div class="card-file">/catalog_part2/dish_006.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(1, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(1, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-2" data-id="2">
+  <img src="/catalog/dish_002.jpg" alt="Аляска" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Аляска</div>
+    <div class="card-id">ID: 2</div>
+    <div class="card-desc">Рис, нори, сыр, тунец, манго, масаго красная, манго соус</div>
+    <div class="card-file">/catalog/dish_002.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(2, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(2, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-3" data-id="3">
+  <img src="/catalog/dish_015.jpg" alt="Анаго" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Анаго</div>
+    <div class="card-id">ID: 3</div>
+    <div class="card-desc">Рис, нори, сыр, тунец, лосось, айсберг, тобико чёрная, унаги соус</div>
+    <div class="card-file">/catalog/dish_015.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(3, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(3, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-5" data-id="5">
+  <img src="/catalog/dish_011.jpg" alt="Маями" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Маями</div>
+    <div class="card-id">ID: 5</div>
+    <div class="card-desc">Рис, нори, сыр, угорь, краб, огурец, масаго зелёная, унаги соус</div>
+    <div class="card-file">/catalog/dish_011.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(5, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(5, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-6" data-id="6">
+  <img src="/catalog/dish_016.jpg" alt="Кайри" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Кайри</div>
+    <div class="card-id">ID: 6</div>
+    <div class="card-desc">Рис, нори, сыр, тунец, креветка, масаго зелёная, чеддер</div>
+    <div class="card-file">/catalog/dish_016.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(6, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(6, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-9" data-id="9">
+  <img src="/catalog/dish_003.jpg" alt="Гурман" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Гурман</div>
+    <div class="card-id">ID: 9</div>
+    <div class="card-desc">Рис, нори, сыр, лосось, авокадо, тобико красная, шапка</div>
+    <div class="card-file">/catalog/dish_003.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(9, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(9, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-11" data-id="11">
+  <img src="/catalog/dish_007.jpg" alt="Сырный ролл" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Сырный ролл</div>
+    <div class="card-id">ID: 11</div>
+    <div class="card-desc">Рис, нори, сыр филадельфия, огурец, лосось, чеддер, спайс</div>
+    <div class="card-file">/catalog/dish_007.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(11, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(11, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-13" data-id="13">
+  <img src="/catalog/dish_009.jpg" alt="Сайтама" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Сайтама</div>
+    <div class="card-id">ID: 13</div>
+    <div class="card-desc">Рис, нори, сыр, лосось с/с, огурец, кунжут</div>
+    <div class="card-file">/catalog/dish_009.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(13, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(13, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-30" data-id="30">
+  <img src="/catalog/dish_008.jpg" alt="Филадельфия лайт" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Филадельфия лайт</div>
+    <div class="card-id">ID: 30</div>
+    <div class="card-desc">Рис, нори, лосось, сыр, огурец, соус манго</div>
+    <div class="card-file">/catalog/dish_008.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(30, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(30, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-31" data-id="31">
+  <img src="/catalog/dish_014.jpg" alt="Калифорния эби" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Калифорния эби</div>
+    <div class="card-id">ID: 31</div>
+    <div class="card-desc">Рис, нори, сыр, огурец, креветка, тобико</div>
+    <div class="card-file">/catalog/dish_014.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(31, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(31, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-32" data-id="32">
+  <img src="/catalog_part4/dish_008.jpeg" alt="Калифорния краб" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Калифорния краб</div>
+    <div class="card-id">ID: 32</div>
+    <div class="card-desc">Рис, нори, авокадо, огурец, краб, тобико</div>
+    <div class="card-file">/catalog_part4/dish_008.jpeg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(32, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(32, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-33" data-id="33">
+  <img src="/catalog/dish_013.jpg" alt="Калифорния с лососем" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Калифорния с лососем</div>
+    <div class="card-id">ID: 33</div>
+    <div class="card-desc">Рис, нори, авокадо, огурец, лосось, тобико</div>
+    <div class="card-file">/catalog/dish_013.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(33, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(33, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-39" data-id="39">
+  <img src="/catalog_part2/dish_004.jpg" alt="Окаяма" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Окаяма</div>
+    <div class="card-id">ID: 39</div>
+    <div class="card-desc">Рис, нори, сыр, авокадо, лосось, угорь, унаги соус</div>
+    <div class="card-file">/catalog_part2/dish_004.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(39, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(39, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-40" data-id="40">
+  <img src="/catalog_part2/dish_007.jpg" alt="Микс ролл" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Микс ролл</div>
+    <div class="card-id">ID: 40</div>
+    <div class="card-desc">Рис, нори, креветка, авокадо, лосось, тунец, сыр, унаги соус</div>
+    <div class="card-file">/catalog_part2/dish_007.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(40, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(40, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-204" data-id="204">
+  <img src="/catalog_part3/dish_001.jpg" alt="Стрит ролл с лососем" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Стрит ролл с лососем</div>
+    <div class="card-id">ID: 204</div>
+    <div class="card-desc">Рис, нори, огурец, сыр, лосось слабосолёный, тобика, спайс-соус</div>
+    <div class="card-file">/catalog_part3/dish_001.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(204, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(204, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-42" data-id="42">
+  <img src="/catalog_part2/dish_002.jpg" alt="Запечённый лосось" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Запечённый лосось</div>
+    <div class="card-id">ID: 42</div>
+    <div class="card-desc">Рис, нори, лосось с/с, авокадо, кунжут, шапка, унаги</div>
+    <div class="card-file">/catalog_part2/dish_002.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(42, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(42, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-43" data-id="43">
+  <img src="/catalog_part2/dish_018.jpg" alt="С крабом и креветкой" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">С крабом и креветкой</div>
+    <div class="card-id">ID: 43</div>
+    <div class="card-desc">Рис, нори, краб, креветка, перец болгарский, шапка, масаго</div>
+    <div class="card-file">/catalog_part2/dish_018.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(43, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(43, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-44" data-id="44">
+  <img src="/catalog_part4/dish_003.jpeg" alt="Запечённый Бона" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Запечённый Бона</div>
+    <div class="card-id">ID: 44</div>
+    <div class="card-desc">Рис, нори, томаго, авокадо, креветка, сыр, шапка, унаги, кунжут</div>
+    <div class="card-file">/catalog_part4/dish_003.jpeg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(44, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(44, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-45" data-id="45">
+  <img src="/catalog_part4/dish_001.jpeg" alt="Запечённый креветка" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Запечённый креветка</div>
+    <div class="card-id">ID: 45</div>
+    <div class="card-desc">Рис, нори, сыр, креветка, авокадо, спайс, масаго, шапка</div>
+    <div class="card-file">/catalog_part4/dish_001.jpeg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(45, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(45, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-47" data-id="47">
+  <img src="/catalog/запечнный_три_рыбы_47.png" alt="Запечённый три рыбы" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Запечённый три рыбы</div>
+    <div class="card-id">ID: 47</div>
+    <div class="card-desc">Рис, нори, угорь, лосось, креветка, шапка, соус устричный, унаги</div>
+    <div class="card-file">/catalog/запечнный_три_рыбы_47.png</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(47, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(47, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-48" data-id="48">
+  <img src="/catalog/запечнный_фила_48.png" alt="Запечённый Фила" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Запечённый Фила</div>
+    <div class="card-id">ID: 48</div>
+    <div class="card-desc">Рис, нори, сыр, огурец, авокадо, лосось, унаги</div>
+    <div class="card-file">/catalog/запечнный_фила_48.png</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(48, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(48, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-49" data-id="49">
+  <img src="/catalog_dish_2026/dish_012.png" alt="Тунец + лосось" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Тунец + лосось</div>
+    <div class="card-id">ID: 49</div>
+    <div class="card-desc">Рис, нори, тунец, лосось с/с, масаго красная, шапка</div>
+    <div class="card-file">/catalog_dish_2026/dish_012.png</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(49, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(49, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-50" data-id="50">
+  <img src="/catalog_part2/dish_016.jpg" alt="Угорь + лосось" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Угорь + лосось</div>
+    <div class="card-id">ID: 50</div>
+    <div class="card-desc">Рис, нори, угорь, лосось с/с, огурец, унаги, масаго, шапка</div>
+    <div class="card-file">/catalog_part2/dish_016.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(50, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(50, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-51" data-id="51">
+  <img src="/catalog_part4/dish_002.jpeg" alt="Сага" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Сага</div>
+    <div class="card-id">ID: 51</div>
+    <div class="card-desc">Рис, нори, угорь, тунец, кунжут белый, унаги соус, шапка</div>
+    <div class="card-file">/catalog_part4/dish_002.jpeg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(51, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(51, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-52" data-id="52">
+  <img src="/catalog_part4/dish_004.jpeg" alt="Сендай (запечённый)" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Сендай (запечённый)</div>
+    <div class="card-id">ID: 52</div>
+    <div class="card-desc">Рис, нори, сыр филадельфия, чеддер, краб, шапка</div>
+    <div class="card-file">/catalog_part4/dish_004.jpeg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(52, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(52, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-53" data-id="53">
+  <img src="/catalog/dish_010.jpg" alt="Крейзи" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Крейзи</div>
+    <div class="card-id">ID: 53</div>
+    <div class="card-desc">Рис, нори, сыр, креветка, лосось, авокадо, масаго красная</div>
+    <div class="card-file">/catalog/dish_010.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(53, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(53, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-54" data-id="54">
+  <img src="/catalog_part2/dish_008.jpg" alt="Эби фрай" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Эби фрай</div>
+    <div class="card-id">ID: 54</div>
+    <div class="card-desc">Рис, нори, сыр филадельфия, моцарелла, креветка тигровая, тобико, огурец</div>
+    <div class="card-file">/catalog_part2/dish_008.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(54, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(54, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-57" data-id="57">
+  <img src="/catalog/dish_017.jpg" alt="Жареный ролл лосось + краб" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Жареный ролл лосось + краб</div>
+    <div class="card-id">ID: 57</div>
+    <div class="card-desc">Рис, нори, лосось, краб, тобико, салат, огурец</div>
+    <div class="card-file">/catalog/dish_017.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(57, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(57, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-66" data-id="66">
+  <img src="/catalog_part2/dish_001.jpg" alt="Сет микс" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Сет микс</div>
+    <div class="card-id">ID: 66</div>
+    <div class="card-desc">Филадельфия люкс, Микс ролл, Запечённая Филадельфия, Запечённый три рыбы</div>
+    <div class="card-file">/catalog_part2/dish_001.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(66, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(66, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-70" data-id="70">
+  <img src="/catalog_part4/dish_006.jpeg" alt="По-шефски" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">По-шефски</div>
+    <div class="card-id">ID: 70</div>
+    <div class="card-desc">Курица гриль, телятина, бекон, ветчина, лук марин., томаты, огурец марин., моцарелла, соус красный</div>
+    <div class="card-file">/catalog_part4/dish_006.jpeg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(70, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(70, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-71" data-id="71">
+  <img src="/catalog_part4/dish_005.jpeg" alt="По-домашнему" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">По-домашнему</div>
+    <div class="card-id">ID: 71</div>
+    <div class="card-desc">Рубленое мясо, сыр, лук марин., томаты, соус чесночный, соус красный</div>
+    <div class="card-file">/catalog_part4/dish_005.jpeg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(71, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(71, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-73" data-id="73">
+  <img src="/catalog_part2/dish_013.jpg" alt="Фермерская" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Фермерская</div>
+    <div class="card-id">ID: 73</div>
+    <div class="card-desc">Курица, сыр, грибы, огурец марин., лук, соус красный</div>
+    <div class="card-file">/catalog_part2/dish_013.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(73, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(73, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-74" data-id="74">
+  <img src="/catalog_part2/dish_014.jpg" alt="Охотничья" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Охотничья</div>
+    <div class="card-id">ID: 74</div>
+    <div class="card-desc">Колбаски охотничьи, сыр, перец болгарский, перец халапеньо, соус красный</div>
+    <div class="card-file">/catalog_part2/dish_014.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(74, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(74, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-75" data-id="75">
+  <img src="/catalog/dish_001.jpg" alt="Гавайская" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Гавайская</div>
+    <div class="card-id">ID: 75</div>
+    <div class="card-desc">Моцарелла, филе куриное, кукуруза, ананас, соус красный</div>
+    <div class="card-file">/catalog/dish_001.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(75, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(75, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-79" data-id="79">
+  <img src="/catalog/dish_012.jpg" alt="С телятиной" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">С телятиной</div>
+    <div class="card-id">ID: 79</div>
+    <div class="card-desc">Телятина, моцарелла, томаты, лук, соус белый</div>
+    <div class="card-file">/catalog/dish_012.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(79, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(79, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-80" data-id="80">
+  <img src="/catalog_dish_2026/dish_011.png" alt="Маргарита" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Маргарита</div>
+    <div class="card-id">ID: 80</div>
+    <div class="card-desc">Моцарелла, томаты, рукола, соус красный</div>
+    <div class="card-file">/catalog_dish_2026/dish_011.png</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(80, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(80, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-81" data-id="81">
+  <img src="/catalog_part2/dish_012.jpg" alt="Карбонара" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Карбонара</div>
+    <div class="card-id">ID: 81</div>
+    <div class="card-desc">Моцарелла, бекон, шампиньоны, яйцо перепелиное, соус белый</div>
+    <div class="card-file">/catalog_part2/dish_012.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(81, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(81, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-84" data-id="84">
+  <img src="/catalog_part2/dish_015.jpg" alt="Милана" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Милана</div>
+    <div class="card-id">ID: 84</div>
+    <div class="card-desc">Моцарелла, красный соус, колбаса милана, ветчина, помидор, зелёный лук</div>
+    <div class="card-file">/catalog_part2/dish_015.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(84, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(84, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-87" data-id="87">
+  <img src="/catalog_part3/dish_004.jpg" alt="Лапша с телятиной" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Лапша с телятиной</div>
+    <div class="card-id">ID: 87</div>
+    <div class="card-desc">Лапша, телятина, шампиньоны, соус</div>
+    <div class="card-file">/catalog_part3/dish_004.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(87, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(87, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-91" data-id="91">
+  <img src="/catalog_part3/dish_005.jpg" alt="Фунчоза с курицей" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Фунчоза с курицей</div>
+    <div class="card-id">ID: 91</div>
+    <div class="card-desc">Стеклянная лапша, курица, овощи</div>
+    <div class="card-file">/catalog_part3/dish_005.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(91, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(91, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-92" data-id="92">
+  <img src="/catalog_part3/dish_003.jpg" alt="Фунчоза с морепродуктами" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Фунчоза с морепродуктами</div>
+    <div class="card-id">ID: 92</div>
+    <div class="card-desc">Стеклянная лапша, креветка, мидии, кальмар, овощи</div>
+    <div class="card-file">/catalog_part3/dish_003.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(92, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(92, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-97" data-id="97">
+  <img src="/catalog_part3/dish_002.jpg" alt="Суп куриный с лапшой" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Суп куриный с лапшой</div>
+    <div class="card-id">ID: 97</div>
+    <div class="card-desc">Бульон, курица, лапша, зелень</div>
+    <div class="card-file">/catalog_part3/dish_002.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(97, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(97, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-108" data-id="108">
+  <img src="/catalog_part2/dish_003.jpg" alt="Нагетсы" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Нагетсы</div>
+    <div class="card-id">ID: 108</div>
+    <div class="card-desc">Куриные нагетсы, хрустящая панировка</div>
+    <div class="card-file">/catalog_part2/dish_003.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(108, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(108, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-112" data-id="112">
+  <img src="/catalog_part2/dish_009.jpg" alt="Луковые кольца" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Луковые кольца</div>
+    <div class="card-id">ID: 112</div>
+    <div class="card-desc">Луковые кольца в панировке</div>
+    <div class="card-file">/catalog_part2/dish_009.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(112, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(112, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-117" data-id="117">
+  <img src="/catalog/dish_004.jpg" alt="Шаурма от шефа" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Шаурма от шефа</div>
+    <div class="card-id">ID: 117</div>
+    <div class="card-desc">Авторский рецепт — максимум начинки</div>
+    <div class="card-file">/catalog/dish_004.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(117, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(117, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-118" data-id="118">
+  <img src="/catalog/dish_006.jpg" alt="Шаурма классическая" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Шаурма классическая</div>
+    <div class="card-id">ID: 118</div>
+    <div class="card-desc">Курица, морковь по-корейски, соленый огурец, фирменный соус</div>
+    <div class="card-file">/catalog/dish_006.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(118, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(118, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card-128" data-id="128">
+  <img src="/catalog_part2/dish_010.jpg" alt="Бургер с лососем" onerror="this.style.height='200px';this.style.background='#1A1A1D';this.parentElement.innerHTML='<div style=\'height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;\'>Нет файла</div>'">
+  <div class="card-body">
+    <div class="card-name">Бургер с лососем</div>
+    <div class="card-id">ID: 128</div>
+    <div class="card-desc">Лосось, сливочный сыр, огурец</div>
+    <div class="card-file">/catalog_part2/dish_010.jpg</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="vote(128, 'yes')">✓ ДА</button>
+      <button class="btn btn-no" onclick="vote(128, 'no')">✗ НЕТ</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="overlay" id="overlay" onclick="closeResult()"></div>
+<div class="result-box" id="resultBox">
+  <button class="close" onclick="closeResult()">&times;</button>
+  <h3>Результаты проверки</h3>
+  <p style="color:#888;margin-bottom:15px;font-size:13px;">Скопируй этот список и отправь мне. Я удалю все фото, отмеченные "нет".</p>
+  <pre id="resultText"></pre>
+</div>
+
+<div class="actions">
+  <button class="fab fab-secondary" onclick="resetAll()">🔄 Сбросить</button>
+  <button class="fab fab-primary" onclick="showResult()">✓ Готово</button>
+</div>
+
+<script>
+var votes = {};
+var total = 47;
+
+function vote(id, choice) {
+  votes[id] = choice;
+
+  var card = document.getElementById('card-' + id);
+  card.classList.remove('approved', 'rejected');
+
+  var yesBtn = card.querySelector('.btn-yes');
+  var noBtn = card.querySelector('.btn-no');
+  yesBtn.classList.remove('active');
+  noBtn.classList.remove('active');
+
+  if (choice === 'yes') {
+    card.classList.add('approved');
+    yesBtn.classList.add('active');
+  } else {
+    card.classList.add('rejected');
+    noBtn.classList.add('active');
+  }
+
+  var checked = Object.keys(votes).length;
+  document.getElementById('progress').textContent = 'Проверено: ' + checked + ' / ' + total;
+}
+
+function showResult() {
+  var yesList = [];
+  var noList = [];
+
+  for (var id in votes) {
+    if (votes[id] === 'yes') yesList.push(id);
+    else noList.push(id);
+  }
+
+  var text = 'ДА (оставить ' + yesList.length + '):\n' + yesList.join(', ') + '\n\n';
+  text += 'НЕТ (удалить ' + noList.length + '):\n' + noList.join(', ');
+
+  document.getElementById('resultText').textContent = text;
+  document.getElementById('resultBox').classList.add('show');
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeResult() {
+  document.getElementById('resultBox').classList.remove('show');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+function resetAll() {
+  votes = {};
+  document.querySelectorAll('.card').forEach(function(c) {
+    c.classList.remove('approved', 'rejected');
+  });
+  document.querySelectorAll('.btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  document.getElementById('progress').textContent = 'Проверено: 0 / ' + total;
+}
+</script>
+</body>
+</html>
