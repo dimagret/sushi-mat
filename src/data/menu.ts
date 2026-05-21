@@ -192,9 +192,9 @@ export const DELIVERY_ZONES = [
   { id: 'cherry', name: 'Черёмушки', freeFrom: 2000, price: 250, isSelf: false, isHere: false },
   { id: 'center', name: 'Центр города', freeFrom: 1500, price: 250, isSelf: false, isHere: false },
   { id: 'mirny', name: 'пос. Мирный', freeFrom: 3000, price: 250, isSelf: false, isHere: false },
-  { id: 'rayon20', name: '20 Райн', freeFrom: 1200, price: 250, isSelf: false, isHere: false },
-  { id: 'rayon17', name: '17 район', freeFrom: 1200, price: 250, isSelf: false, isHere: false },
-  { id: 'rayon23', name: '23 район', freeFrom: 1200, price: 250, isSelf: false, isHere: false },
+  { id: 'rayon20', name: '20 микрорайон', freeFrom: 1200, price: 250, isSelf: false, isHere: false },
+  { id: 'rayon17', name: '17 микрорайон', freeFrom: 1200, price: 250, isSelf: false, isHere: false },
+  { id: 'rayon23', name: '23 микрорайон', freeFrom: 1000, price: 250, isSelf: false, isHere: false },
   { id: 'self', name: 'Самовывоз', freeFrom: 0, price: 0, isSelf: true, isHere: false },
 ];
 
