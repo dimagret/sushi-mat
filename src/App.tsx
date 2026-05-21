@@ -9,7 +9,6 @@ import LoyaltySection from '@/sections/LoyaltySection';
 import DeliverySection from '@/sections/DeliverySection';
 import Footer from '@/sections/Footer';
 import CartDrawer from '@/sections/CartDrawer';
-import WhatsAppWidget from '@/sections/WhatsAppWidget';
 import ScrollToTop from '@/sections/ScrollToTop';
 import QuickViewModal from '@/sections/QuickViewModal';
 import MobileCartBar from '@/sections/MobileCartBar';
@@ -51,7 +50,6 @@ function HomePage() {
         total={cart.total}
         onOpenCart={() => cart.setIsOpen(true)}
       />
-      <WhatsAppWidget />
       <ScrollToTop />
       <QuickViewModal item={quickView} onClose={() => setQuickView(null)} onAdd={cart.addItem} />
       <CookieConsent />
