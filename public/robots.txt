@@ -4,12 +4,19 @@ Disallow: /admin/
 Disallow: /api/
 Disallow: /cart/
 Disallow: /checkout/
+Disallow: /order/
+Disallow: /search/
+Disallow: /favorites/
+Disallow: /compare/
 Disallow: /*?sort=
 Disallow: /*?filter=
 Disallow: /*?page=
+Disallow: /*?utm_
+Disallow: /*?yclid=
+Disallow: /*?gclid=
 
 # Sitemap
-Sitemap: https://byq3gqnkz6hsq.kimi.page/sitemap.xml
+Sitemap: https://sushimom.ru/sitemap.xml
 
 # Google
 User-agent: Googlebot
