@@ -86,7 +86,7 @@ export default function Hero() {
                 src="/images/pizza-4-flavors.jpg"
                 alt="4 вкуса: роллы, салаты, шаурма, пицца"
                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                loading="eager"
+                loading="eager" decoding="async"
               />
               <div className="pointer-events-none absolute inset-0">
                 <div className="absolute left-1/2 top-0 h-full w-[1.5px] -translate-x-1/2 bg-gradient-to-b from-transparent via-[#D4A853]/50 to-transparent" />

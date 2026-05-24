@@ -366,7 +366,7 @@ export default function MenuSection({ onAddToCart, onQuickView }: MenuSectionPro
                       src={item.image}
                       alt={item.name}
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
+                      loading="lazy" decoding="async"
                     />
                   ) : (
                     <>
