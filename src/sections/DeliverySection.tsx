@@ -170,6 +170,51 @@ export default function DeliverySection() {
               </div>
             </div>
 
+            {/* Location Card */}
+            <div className="delivery-card overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-[#121214] to-[#161618] transition-all hover:border-[#D4A853]/20">
+              <div className="p-4 md:p-6">
+                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-white md:text-lg">
+                  <MapPin className="h-4 w-4 text-[#D4A853] md:h-5 md:w-5" /> Мы на карте
+                </h3>
+                <div className="rounded-xl border border-[#D4A853]/10 bg-[#0E0E12] p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#D4A853]/10">
+                      <MapPin className="h-5 w-5 text-[#D4A853]" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-white">Суши Мать</div>
+                      <div className="mt-0.5 text-xs text-white/50">Ул. Урицкого 83В, Мариуполь</div>
+                      <div className="mt-1 text-xs text-white/30">Ильичёвский район · Точка самовывоза</div>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <a
+                      href="https://yandex.ru/maps/org/sushi_mater/1949853836"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-[#D4A853] px-3 py-2 text-xs font-semibold text-[#0A0A0D] transition-all hover:bg-[#E5B964] md:text-sm"
+                    >
+                      <Navigation className="h-3 w-3 md:h-4 md:w-4" />
+                      Построить маршрут
+                    </a>
+                    <a
+                      href="https://yandex.ru/maps/org/sushi_mater/1949853836"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center rounded-lg border border-white/10 px-3 py-2 text-xs text-white/60 transition-all hover:border-[#D4A853]/30 hover:text-white md:text-sm"
+                    >
+                      Подробнее
+                    </a>
+                  </div>
+                </div>
+                {/* Delivery radius hint */}
+                <div className="mt-3 flex items-center gap-2 text-xs text-white/40">
+                  <Truck className="h-3.5 w-3.5 text-[#D4A853]" />
+                  <span>Доставляем по всем районам Мариуполя — от 45 мин</span>
+                </div>
+              </div>
+            </div>
+
             {/* Info cards */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4">
               <div className="delivery-card rounded-xl border border-white/5 bg-[#121214] p-4 transition-all hover:border-[#D4A853]/10 md:p-5">
@@ -183,7 +228,6 @@ export default function DeliverySection() {
                 <div className="mt-1 text-xs text-white/50 md:text-sm">Минимальный заказ 500 ₽. Бесплатно от 1000 ₽.</div>
               </div>
             </div>
-
 
           </div>
         </div>

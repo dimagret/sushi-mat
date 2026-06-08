@@ -54,33 +54,67 @@ export default function CartDrawer({
     // Build order number
     const orderNumber = Math.floor(Math.random() * 9000 + 1000);
 
-    // Always try Telegram silently (internal only)
+    // === ОТПРАВКА ЗАКАЗА НА СЕРВЕР ===
+    // Сначала пробуем серверный PHP-скрипт (надёжнее, токен не виден клиенту)
+    let serverSent = false;
     try {
-      const tgSettingsRaw = localStorage.getItem('telegram_settings');
-      if (tgSettingsRaw) {
-        const tgSettings = JSON.parse(tgSettingsRaw);
-        if (tgSettings.botToken && tgSettings.chatId) {
-          const itemsText = cart.map((ci) => `  • ${ci.item.name} x${ci.quantity} = ${FMT(calcItemPrice(ci.item, ci.selectedOptions) * ci.quantity)}`).join('\n');
-          const message = `🍣 <b>Новый заказ Суши Мать #${orderNumber}!</b>\n\n` +
-            `👤 <b>Имя:</b> ${form.name}\n` +
-            `📱 <b>Телефон:</b> ${form.phone}\n` +
-            `📍 <b>Адрес:</b> ${form.address || 'Самовывоз'}\n` +
-            `🕐 <b>Время:</b> ${form.time}\n` +
-            (form.comment ? `💬 <b>Комментарий:</b> ${form.comment}\n` : '') +
-            `\n📋 <b>Заказ:</b>\n${itemsText}\n\n` +
-            (promoApplied ? `🎁 <b>Промокод:</b> −${FMT(promoDiscount)}\n` : '') +
-            `🚚 <b>Доставка:</b> ${deliveryPrice === 0 ? 'Бесплатно' : FMT(deliveryPrice)}\n` +
-            `💰 <b>Итого:</b> <b>${FMT(finalTotal)}</b>`;
+      const orderPayload = {
+        items: cart.map((ci) => ({
+          name: ci.item.name,
+          quantity: ci.quantity,
+          price: calcItemPrice(ci.item, ci.selectedOptions),
+        })),
+        total: finalTotal,
+        phone: form.phone,
+        name: form.name,
+        address: form.address || 'Самовывоз',
+        payment: form.payment === 'cash' ? 'Наличные' : form.payment === 'card' ? 'Карта курьеру' : 'Онлайн',
+        comment: form.comment || '',
+        deliveryTime: form.time || 'Как можно скорее',
+      };
 
-          await fetch('https://api.telegram.org/bot' + tgSettings.botToken + '/sendMessage', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: tgSettings.chatId, text: message, parse_mode: 'HTML' }),
-          });
-        }
+      const resp = await fetch('/api/send-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderPayload),
+      });
+
+      if (resp.ok) {
+        serverSent = true;
       }
     } catch {
-      // Silently fail — order still accepted, Telegram is optional
+      // Серверная отправка не сработала — fallback на клиентскую
+    }
+
+    // Fallback: клиентская отправка в Telegram (если серверная не сработала)
+    if (!serverSent) {
+      try {
+        const tgSettingsRaw = localStorage.getItem('telegram_settings');
+        if (tgSettingsRaw) {
+          const tgSettings = JSON.parse(tgSettingsRaw);
+          if (tgSettings.botToken && tgSettings.chatId) {
+            const itemsText = cart.map((ci) => `  • ${ci.item.name} x${ci.quantity} = ${FMT(calcItemPrice(ci.item, ci.selectedOptions) * ci.quantity)}`).join('\n');
+            const message = `🍣 <b>Новый заказ Суши Мать #${orderNumber}!</b>\n\n` +
+              `👤 <b>Имя:</b> ${form.name}\n` +
+              `📱 <b>Телефон:</b> ${form.phone}\n` +
+              `📍 <b>Адрес:</b> ${form.address || 'Самовывоз'}\n` +
+              `🕐 <b>Время:</b> ${form.time}\n` +
+              (form.comment ? `💬 <b>Комментарий:</b> ${form.comment}\n` : '') +
+              `\n📋 <b>Заказ:</b>\n${itemsText}\n\n` +
+              (promoApplied ? `🎁 <b>Промокод:</b> −${FMT(promoDiscount)}\n` : '') +
+              `🚚 <b>Доставка:</b> ${deliveryPrice === 0 ? 'Бесплатно' : FMT(deliveryPrice)}\n` +
+              `💰 <b>Итого:</b> <b>${FMT(finalTotal)}</b>`;
+
+            await fetch('https://api.telegram.org/bot' + tgSettings.botToken + '/sendMessage', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ chat_id: tgSettings.chatId, text: message, parse_mode: 'HTML' }),
+            });
+          }
+        }
+      } catch {
+        // Silently fail — order still accepted
+      }
     }
 
     // Always try MAX silently (internal only)

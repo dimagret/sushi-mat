@@ -12,6 +12,22 @@ const LEGAL_LINKS = [
   { label: 'Политика конфиденциальности', href: '/privacy.html', icon: Shield },
 ];
 
+const MENU_LINKS = [
+  { label: 'Роллы', href: '/menu/rolly.html' },
+  { label: 'Филадельфия', href: '/menu/filadelfiya.html' },
+  { label: 'Драконы', href: '/menu/dragons.html' },
+  { label: 'Пицца', href: '/menu/pizza.html' },
+  { label: 'Шаурма', href: '/menu/shawarma.html' },
+  { label: 'Сеты', href: '/menu/sets.html' },
+];
+
+const DELIVERY_LINKS = [
+  { label: 'Ильичёвский район', href: '/delivery/ilichevskiy-raion.html' },
+  { label: 'Центр города', href: '/delivery/centr-mariupol.html' },
+  { label: 'Черёмушки', href: '/delivery/cheryomushki.html' },
+  { label: 'Посёлок Мирный', href: '/delivery/pos-mirnyy.html' },
+];
+
 export default function Footer() {
   return (
     <footer className="border-t border-white/5 bg-[#0A0A0D]">
@@ -66,6 +82,26 @@ export default function Footer() {
                   className="flex items-center gap-1 text-xs text-white/40 transition-colors hover:text-[#D4A853] md:text-sm"
                 >
                   <link.icon className="h-3 w-3" />
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Menu links — SEO internal linking */}
+          <div className="flex flex-col gap-2.5">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-white/60">Меню доставки</h4>
+            <div className="flex flex-wrap gap-x-4 gap-y-2">
+              {MENU_LINKS.map((link) => (
+                <a key={link.href} href={link.href} className="text-xs text-white/40 transition-colors hover:text-[#D4A853] md:text-sm">
+                  {link.label}
+                </a>
+              ))}
+            </div>
+            <h4 className="mt-3 text-xs font-semibold uppercase tracking-wider text-white/60">Районы доставки</h4>
+            <div className="flex flex-wrap gap-x-4 gap-y-2">
+              {DELIVERY_LINKS.map((link) => (
+                <a key={link.href} href={link.href} className="text-xs text-white/40 transition-colors hover:text-[#D4A853] md:text-sm">
                   {link.label}
                 </a>
               ))}

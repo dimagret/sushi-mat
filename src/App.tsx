@@ -5,6 +5,7 @@ import Hero from '@/sections/Hero';
 import USPStrip from '@/sections/USPStrip';
 import StorySection from '@/sections/StorySection';
 import MenuSection from '@/sections/MenuSection';
+import ReviewsSection from '@/sections/ReviewsSection';
 import LoyaltySection from '@/sections/LoyaltySection';
 import DeliverySection from '@/sections/DeliverySection';
 import Footer from '@/sections/Footer';
@@ -29,15 +30,18 @@ function HomePage() {
   return (
     <div className="min-h-screen bg-[#0A0A0D] text-white">
       <Header cartCount={cart.count} onOpenCart={() => cart.setIsOpen(true)} />
-      <Hero />
-      <USPStrip />
-      <StorySection />
-      <MenuSection
-        onAddToCart={cart.addItem}
-        onQuickView={setQuickView}
-      />
-      <LoyaltySection />
-      <DeliverySection />
+      <main>
+        <Hero />
+        <USPStrip />
+        <StorySection />
+        <MenuSection
+          onAddToCart={cart.addItem}
+          onQuickView={setQuickView}
+        />
+        <ReviewsSection />
+        <LoyaltySection />
+        <DeliverySection />
+      </main>
       <Footer />
       <Suspense fallback={<LazyFallback />}>
         <CartDrawer

@@ -39,7 +39,7 @@ export default function Hero() {
             Принимаем заказы: 09:00 – 21:00
           </div>
 
-          <h1 className="hero-anim font-['Playfair_Display_SC'] text-[2.5rem] font-bold leading-[1.05] sm:text-5xl md:text-[3.5rem]">
+          <h1 className="hero-anim text-left font-['Playfair_Display_SC'] text-[1.85rem] font-bold leading-[1.05] sm:text-[2.3rem] md:text-[2.9rem]">
             Вкусно.
             <br />
             Быстро.
@@ -47,9 +47,13 @@ export default function Hero() {
             <span className="gold-gradient-text">Свежо.</span>
           </h1>
 
-          <p className="hero-anim max-w-lg text-sm font-extralight leading-relaxed tracking-wider text-white/50 md:text-base">
-            Доставка роллов, пиццы, шаурмы и бургеров в Мариуполе. От 45 минут.
-            Свежие ингредиенты, быстрое приготовление, удобная оплата.
+          <p className="hero-anim -mt-1 text-base font-semibold tracking-wide text-white/80 md:text-lg">
+            Доставка роллов, пиццы и шаурмы в Мариуполе
+          </p>
+
+          <p className="hero-anim -mt-1 max-w-lg text-sm font-extralight leading-relaxed tracking-wider text-white/50 md:text-base">
+            80+ блюд: Филадельфия, Калифорния, Дракон, запечённые роллы, пицца 30 и 50 см.
+            Доставляем от 45 минут, от 250 ₽. Работаем ежедневно с 09:00 до 21:00.
           </p>
 
           <div className="hero-anim flex flex-wrap gap-3 md:gap-4">
@@ -87,6 +91,7 @@ export default function Hero() {
                 alt="4 вкуса: роллы, салаты, шаурма, пицца"
                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 loading="eager" decoding="async"
+                width="760" height="760"
               />
               <div className="pointer-events-none absolute inset-0">
                 <div className="absolute left-1/2 top-0 h-full w-[1.5px] -translate-x-1/2 bg-gradient-to-b from-transparent via-[#D4A853]/50 to-transparent" />

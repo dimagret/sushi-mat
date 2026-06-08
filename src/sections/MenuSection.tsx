@@ -17,53 +17,43 @@ interface MenuSectionProps {
 
 type FilterType = 'all' | 'hit' | 'new' | 'hot' | 'under400';
 
-// Super-category group mapping — only categories that exist in menu
+// Category group mapping — each hot food category is separate
 const CAT_GROUPS: Record<string, string[]> = {
   all: [],
   hit: [],
   hot: ['hot'],
-  shawarma: ['shawarma'],
-  burgers: ['burgers'],
-  philly: ['philly'],
-  california: ['california'],
-  dragons: ['dragons'],
-  maki: ['maki'],
-  street: ['street'],
-  rolls: ['rolls'],
-  baked: ['baked'],
-  fried: ['fried'],
+  // Роллы: все ролловые категории
+  rolls: ['rolls', 'philly', 'california', 'dragons', 'maki', 'street', 'baked', 'fried'],
+  // Суши-наборы
   sets: ['sets'],
+  // Пицца
   pizza: ['pizza'],
+  // Шаурма отдельно
+  shawarma: ['shawarma'],
+  // Бургеры отдельно
+  burgers: ['burgers'],
+  // WOK, лапша, тяхан
+  noodles: ['noodles', 'tyahan'],
+  // Супы
   soups: ['soups'],
-  noodles: ['noodles'],
-  tyahan: ['tyahan'],
+  // Фритюр и закуски (включая шевчики)
+  fry: ['fry', 'shevchiki'],
+  // Салаты
   salads: ['salads'],
-  fry: ['fry'],
-  shevchiki: ['shevchiki'],
 };
 
 const VISIBLE_CATS = [
-  { id: 'all', label: 'Все' },
+  { id: 'all', label: 'Все меню' },
   { id: 'hit', label: 'Хиты' },
-  { id: 'hot', label: 'Острое' },
+  { id: 'rolls', label: 'Роллы' },
+  { id: 'sets', label: 'Суши-сеты' },
+  { id: 'pizza', label: 'Пицца' },
   { id: 'shawarma', label: 'Шаурма' },
   { id: 'burgers', label: 'Бургеры' },
-  { id: 'philly', label: 'Филадельфия' },
-  { id: 'california', label: 'Калифорния' },
-  { id: 'dragons', label: 'Драконы' },
-  { id: 'maki', label: 'Маки' },
-  { id: 'street', label: 'Стрит' },
-  { id: 'rolls', label: 'Роллы' },
-  { id: 'baked', label: 'Запечённые' },
-  { id: 'fried', label: 'Горячие' },
-  { id: 'sets', label: 'Сеты' },
-  { id: 'pizza', label: 'Пицца' },
+  { id: 'noodles', label: 'WOK и лапша' },
   { id: 'soups', label: 'Супы' },
-  { id: 'noodles', label: 'WOK' },
-  { id: 'tyahan', label: 'Тяхан' },
-  { id: 'salads', label: 'Салаты' },
   { id: 'fry', label: 'Закуски' },
-  { id: 'shevchiki', label: 'Шевчики' },
+  { id: 'salads', label: 'Салаты' },
 ];
 
 // Format item description: remove repetitive base, use bullet separators
@@ -142,9 +132,10 @@ export default function MenuSection({ onAddToCart, onQuickView }: MenuSectionPro
     };
   }, []);
 
-  // Reset expanded when category/search/filter changes
+  // Reset expanded and sub-cat when category/search/filter changes
   useEffect(() => {
     setExpanded(false);
+    setActiveSubCat(null);
   }, [activeCat, search, activeFilter]);
 
   // GSAP card entrance
@@ -195,6 +186,25 @@ export default function MenuSection({ onAddToCart, onQuickView }: MenuSectionPro
   const INITIAL_COUNT = 10;
   const visibleItems = expanded ? filtered : filtered.slice(0, INITIAL_COUNT);
   const hiddenCount = filtered.length - visibleItems.length;
+
+  // Sub-category breakdown for rolls — shown when "Роллы" is selected
+  const ROLL_SUBCATS = [
+    { id: 'philly', label: 'Филадельфия' },
+    { id: 'california', label: 'Калифорния' },
+    { id: 'dragons', label: 'Драконы' },
+    { id: 'baked', label: 'Запечённые' },
+    { id: 'fried', label: 'Горячие' },
+    { id: 'maki', label: 'Маки' },
+    { id: 'street', label: 'Стрит' },
+    { id: 'rolls', label: 'Классические' },
+  ];
+  const [activeSubCat, setActiveSubCat] = useState<string | null>(null);
+
+  // Apply sub-filter for rolls
+  const displayItems = useMemo(() => {
+    if (activeCat !== 'rolls' || !activeSubCat) return visibleItems;
+    return visibleItems.filter((i) => i.cats.includes(activeSubCat));
+  }, [visibleItems, activeCat, activeSubCat]);
 
   const getSelectedOptions = (item: MenuItem): number[] => {
     const opts = itemOptions[item.id] || (item.options?.map(() => 0) ?? []);
@@ -314,12 +324,12 @@ export default function MenuSection({ onAddToCart, onQuickView }: MenuSectionPro
         {/* Category tabs with arrows */}
         <div className="relative mb-8">
           {showLeftArrow && (
-            <button onClick={() => scrollTabs('left')} className="absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full bg-[#0A0A0D]/80 p-1.5 text-white/70 shadow-lg backdrop-blur hover:text-white">
+            <button onClick={() => scrollTabs('left')} aria-label="Прокрутить фильтры влево" className="absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full bg-[#0A0A0D]/80 p-1.5 text-white/70 shadow-lg backdrop-blur hover:text-white">
               <ChevronLeft className="h-4 w-4" />
             </button>
           )}
           {showRightArrow && (
-            <button onClick={() => scrollTabs('right')} className="absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded-full bg-[#0A0A0D]/80 p-1.5 text-white/70 shadow-lg backdrop-blur hover:text-white">
+            <button onClick={() => scrollTabs('right')} aria-label="Прокрутить фильтры вправо" className="absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded-full bg-[#0A0A0D]/80 p-1.5 text-white/70 shadow-lg backdrop-blur hover:text-white">
               <ChevronRight className="h-4 w-4" />
             </button>
           )}
@@ -340,6 +350,35 @@ export default function MenuSection({ onAddToCart, onQuickView }: MenuSectionPro
           </div>
         </div>
 
+        {/* Sub-category pills for rolls */}
+        {activeCat === 'rolls' && (
+          <div className="mb-6 flex flex-wrap gap-2">
+            <button
+              onClick={() => setActiveSubCat(null)}
+              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                !activeSubCat
+                  ? 'bg-[#D4A853] text-[#0A0A0D]'
+                  : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              Все роллы
+            </button>
+            {ROLL_SUBCATS.map((sc) => (
+              <button
+                key={sc.id}
+                onClick={() => setActiveSubCat(sc.id)}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                  activeSubCat === sc.id
+                    ? 'bg-[#D4A853] text-[#0A0A0D]'
+                    : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                {sc.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Results count */}
         <div className="mb-4 text-sm text-white/40">
           Найдено: {filtered.length} {filtered.length === 1 ? 'позиция' : filtered.length < 5 ? 'позиции' : 'позиций'}
@@ -347,7 +386,7 @@ export default function MenuSection({ onAddToCart, onQuickView }: MenuSectionPro
 
         {/* Menu grid — clean cards with color coding */}
         <div ref={gridRef} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {visibleItems.map((item) => {
+          {displayItems.map((item) => {
             const visual = getItemVisual(item.id);
             return (
               <div
@@ -397,6 +436,7 @@ export default function MenuSection({ onAddToCart, onQuickView }: MenuSectionPro
                   {/* Favorite button */}
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleFavorite(item.id); addToast(isFavorite(item.id) ? `${item.name} удалён из избранного` : `${item.name} добавлен в избранное`, 'info'); }}
+                    aria-label={isFavorite(item.id) ? `Удалить ${item.name} из избранного` : `Добавить ${item.name} в избранное`}
                     className="absolute left-3 top-3 z-10 rounded-full bg-[#0A0A0D]/60 p-2 opacity-0 backdrop-blur transition-all group-hover:opacity-100 hover:bg-[#0A0A0D]/80"
                   >
                     <Heart className={`h-4 w-4 ${isFavorite(item.id) ? 'fill-red-500 text-red-500' : 'text-white/70 hover:text-red-400'}`} />
@@ -404,6 +444,7 @@ export default function MenuSection({ onAddToCart, onQuickView }: MenuSectionPro
                   {/* Quick view button */}
                   <button
                     onClick={() => onQuickView(item)}
+                    aria-label={`Быстрый просмотр: ${item.name}`}
                     className="absolute right-3 top-3 z-10 rounded-full bg-[#0A0A0D]/60 p-2 text-white/70 opacity-0 backdrop-blur transition-all group-hover:opacity-100 hover:bg-[#0A0A0D]/80 hover:text-[#D4A853]"
                   >
                     <Eye className="h-4 w-4" />
@@ -415,7 +456,7 @@ export default function MenuSection({ onAddToCart, onQuickView }: MenuSectionPro
                   <meta itemProp="priceCurrency" content="RUB" />
                   <meta itemProp="availability" content="https://schema.org/InStock" />
                   <h3 className="text-sm font-semibold text-white" itemProp="name">{item.name}</h3>
-                  <p className="mt-1 line-clamp-2 text-xs text-white/60" itemProp="description">{formatDesc(item.desc)}</p>
+                  <p className="mt-1 line-clamp-2 text-xs text-white/70" itemProp="description">{formatDesc(item.desc)}</p>
                   {item.weight && (
                     <span className="mt-1.5 text-[11px] text-white/30">{item.weight}</span>
                   )}

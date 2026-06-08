@@ -77,13 +77,13 @@ export default function LoyaltySection() {
 
         <div className="mx-auto grid max-w-lg gap-6 md:max-w-2xl">
           {/* Birthday discount */}
-          <div className="loyalty-card rounded-2xl border border-[#D4A853]/15 bg-gradient-to-br from-[#D4A853]/[0.03] to-transparent p-6 transition-all duration-300 hover:border-[#D4A853]/30 hover:-translate-y-1">
+          <div className="loyalty-card rounded-2xl border border-[#D4A853]/15 bg-gradient-to-br from-[#D4A853]/[0.05] to-transparent p-6 transition-all duration-300 hover:border-[#D4A853]/30 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(212,168,83,0.1)]">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#D4A853]/10">
               <Cake className="h-6 w-6 text-[#D4A853]" />
             </div>
-            <h3 className="text-lg font-semibold text-white">Скидка 10% в день рождения 🎂</h3>
-            <p className="mt-2 text-sm text-white/50">
-              Укажите дату — мы сгенерируем персональный промокод со скидкой 10%.
+            <h3 className="text-lg font-semibold text-white">Скидка 10% в день рождения</h3>
+            <p className="mt-2 text-sm text-white/60">
+              Укажите дату — мы сгенерируем персональный промокод со скидкой 10%. Примените при оформлении заказа.
             </p>
 
             {!promoCode ? (
@@ -92,11 +92,13 @@ export default function LoyaltySection() {
                   type="date"
                   value={birthday}
                   onChange={(e) => setBirthday(e.target.value)}
+                  aria-label="Дата рождения для получения скидки 10%"
                   className="flex-1 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-[#D4A853]"
                 />
                 <button
                   onClick={activateBirthday}
                   disabled={!birthday}
+                  aria-label="Получить промокод на скидку 10%"
                   className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
                     birthday
                       ? 'bg-[#D4A853] text-[#0A0A0D] hover:bg-[#E5B964]'
@@ -137,13 +139,19 @@ export default function LoyaltySection() {
           </div>
 
           {/* Telegram promo */}
-          <div className="loyalty-card rounded-2xl border border-white/5 bg-gradient-to-br from-sky-500/[0.03] to-transparent p-6 text-center transition-all duration-300 hover:border-sky-500/20">
-            <p className="text-sm text-white/60">Эксклюзивные акции и скидки только для подписчиков 📢</p>
+          <div className="loyalty-card rounded-2xl border border-sky-500/10 bg-gradient-to-br from-sky-500/[0.05] to-transparent p-6 text-center transition-all duration-300 hover:border-sky-500/25 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(14,165,233,0.1)]">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-sky-500/10">
+              <Send className="h-6 w-6 text-sky-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-white">Эксклюзивные акции</h3>
+            <p className="mt-2 text-sm text-white/60">
+              Скидки и спецпредложения только для подписчиков Telegram. Будьте первым!
+            </p>
             <a
               href="https://t.me/Sushimother1"
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3 inline-flex items-center gap-2 rounded-lg bg-sky-500/10 px-4 py-2 text-sm font-medium text-sky-400 transition-colors hover:bg-sky-500/20"
+              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-sky-500 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-sky-400 hover:shadow-[0_0_20px_rgba(14,165,233,0.3)]"
             >
               <Send className="h-4 w-4" />
               Подписаться в Telegram

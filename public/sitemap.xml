@@ -3,15 +3,23 @@
   <!-- Главная -->
   <url>
     <loc>https://sushimom.ru/</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+  </url>
+
+  <!-- Меню страница -->
+  <url>
+    <loc>https://sushimom.ru/menu.html</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>
 
   <!-- Меню -->
   <url>
     <loc>https://sushimom.ru/menu</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -19,75 +27,83 @@
   <!-- Категории меню -->
   <url>
     <loc>https://sushimom.ru/menu/rolly</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://sushimom.ru/menu/filadelfiya</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://sushimom.ru/menu/maki</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://sushimom.ru/menu/dragons</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://sushimom.ru/menu/zapechennye</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://sushimom.ru/menu/picca</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://sushimom.ru/menu/shaurma</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://sushimom.ru/menu/salaty</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://sushimom.ru/menu/sety</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://sushimom.ru/menu/goryachie</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://sushimom.ru/menu/street</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
+  </url>
+
+  <!-- Доставка страница -->
+  <url>
+    <loc>https://sushimom.ru/delivery.html</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>
 
   <!-- Доставка -->
   <url>
     <loc>https://sushimom.ru/delivery</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -95,43 +111,43 @@
   <!-- Районы доставки -->
   <url>
     <loc>https://sushimom.ru/delivery/ilichevskiy-raion</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://sushimom.ru/delivery/cheryomushki</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://sushimom.ru/delivery/centr-mariupol</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://sushimom.ru/delivery/pos-mirnyy</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://sushimom.ru/delivery/17-mikrorayon</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://sushimom.ru/delivery/20-mikrorayon</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://sushimom.ru/delivery/23-mikrorayon</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -139,7 +155,7 @@
   <!-- Самовывоз -->
   <url>
     <loc>https://sushimom.ru/samovyvoz</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -147,7 +163,7 @@
   <!-- Контакты -->
   <url>
     <loc>https://sushimom.ru/contacts</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -155,7 +171,7 @@
   <!-- О нас -->
   <url>
     <loc>https://sushimom.ru/about</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -163,7 +179,7 @@
   <!-- Отзывы -->
   <url>
     <loc>https://sushimom.ru/reviews</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -171,7 +187,7 @@
   <!-- Акции -->
   <url>
     <loc>https://sushimom.ru/akcii</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -179,7 +195,7 @@
   <!-- FAQ -->
   <url>
     <loc>https://sushimom.ru/faq</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -187,13 +203,13 @@
   <!-- Правовая информация -->
   <url>
     <loc>https://sushimom.ru/privacy</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://sushimom.ru/offer</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
